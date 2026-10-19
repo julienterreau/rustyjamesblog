@@ -1,0 +1,63 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --font-sans: var(--font-montserrat), sans-serif;
+  --font-display: var(--font-cormorant), "Times New Roman", serif;
+  --color-ink: #161616;
+  --color-muted: #737373;
+  --color-line: #e7e7e7;
+  --color-paper: #f7f7f7;
+  --color-accent: #ef003f;
+}
+
+html {
+  color-scheme: light;
+  background: #fff;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: #fff;
+  color: #161616;
+}
+
+.article-body :where(*) {
+  color: inherit !important;
+  background-color: transparent !important;
+  font-family: inherit !important;
+}
+
+.article-body :where(h1, h2, h3, h4, h5, h6) {
+  color: var(--tw-prose-headings) !important;
+  font-family: var(--font-display) !important;
+}
+
+.article-body :where(a, a *) {
+  color: var(--tw-prose-links) !important;
+}
+
+.article-body :where(strong, b) {
+  color: var(--tw-prose-bold) !important;
+}
+
+.article-body :where(blockquote, blockquote *) {
+  color: var(--tw-prose-quotes) !important;
+}
+
+.article-body :where(code) {
+  color: var(--tw-prose-code) !important;
+  font-family: ui-monospace, monospace !important;
+}
+
+.article-body :where(p) {
+  margin-top: 1.25em !important;
+  margin-bottom: 1.25em !important;
+}
+
+.article-body :where(img) {
+  max-width: 100%;
+  height: auto;
+}
