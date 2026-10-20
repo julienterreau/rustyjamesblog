@@ -1,45 +1,27 @@
-import Image from "next/image";
-import Link from "next/link";
-
-const links = [
-  { href: "/", label: "Accueil" },
-  { href: "/#une", label: "À la une" },
-  { href: "/#dossiers", label: "Dossiers" },
-  { href: "/#categories", label: "Catégories" },
-  { href: "/archives", label: "Archives" },
-];
-
-const HERO =
-  "https://framerusercontent.com/images/Cb0QLJCrXm8ekn3uGr4BvCaHWcg.jpg";
+import { SubscribeForm } from "@/components/subscribe-form";
+import { SiteNav, SiteNavFallback } from "@/components/site-nav";
+import { Suspense } from "react";
 
 export function SiteHeader({ hero = false }: { hero?: boolean }) {
   return (
     <header>
       {hero ? (
         <div className="relative w-full" style={{ aspectRatio: "1571 / 672" }}>
-          <Image
-            src={HERO}
+          <img
+            src="/hero.webp"
             alt="Rusty James News : le Capitole sous les éclairs violets"
-            fill
-            preload
+            width={1571}
+            height={672}
             fetchPriority="high"
-            sizes="100vw"
-            className="object-cover"
+            decoding="sync"
+            className="absolute inset-0 h-full w-full object-cover"
           />
         </div>
       ) : null}
       <div className="mx-auto w-full max-w-[1600px] px-6">
-        <nav className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 border-y border-[#e7e7e7] py-3.5">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-[13px] font-bold tracking-[-0.02em] text-[#737373]"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <Suspense fallback={<SiteNavFallback />}>
+          <SiteNav />
+        </Suspense>
       </div>
     </header>
   );
@@ -47,9 +29,10 @@ export function SiteHeader({ hero = false }: { hero?: boolean }) {
 
 export function SiteFooter() {
   return (
-    <footer className="mx-auto w-full max-w-[1600px] border-t border-[#e7e7e7] px-6 py-6">
+    <footer className="mx-auto w-full max-w-[1600px] border-t border-[#e7e7e7] px-6 py-6 text-center">
       <p className="font-display text-2xl font-bold tracking-[-0.02em]">Rusty James News</p>
-      <p className="mt-2 max-w-xl text-xs leading-relaxed text-[#737373]">
+      <SubscribeForm />
+      <p className="mx-auto mt-4 max-w-xl text-xs leading-relaxed text-[#737373]">
         Archives et opinions dans leur contexte d’origine. Photographies de une :
         illustrations thématiques, et non images originales des articles.
       </p>

@@ -17,9 +17,9 @@ export function absoluteUrl(path: string) {
 
 export const site = {
   name: SITE_NAME,
-  title: "Rusty James News — archives en sciences, histoire et société",
+  title: "Rusty James News — Sciences, politique et ésotérisme",
   description:
-    "Édition indépendante des archives Rusty James : chapôs rédigés pour ce site, textes datés et classés hors de leur fil d’origine. Sciences, histoire, politique et traditions.",
+    "Un autre regard sur le monde. Sciences, politique et traditions ésotériques : les archives du blog Rusty James News depuis 2009.",
   slogan: "Explorer. Questionner. Comprendre.",
   locale: "fr_FR",
   language: "fr-FR",

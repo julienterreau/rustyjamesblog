@@ -1,27 +1,31 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Montserrat } from "next/font/google";
+import { EB_Garamond, Montserrat } from "next/font/google";
+import { Suspense } from "react";
+import { GazetteFooter } from "@/components/gazette-footer";
+import { GazetteHeader } from "@/components/gazette-header";
 import { JsonLd } from "@/components/json-ld";
-import { SiteFooter } from "@/components/site-chrome";
 import { siteGraph } from "@/lib/seo";
 import { getSiteUrl, site } from "@/lib/site";
-import "./globals.css";
+import "../globals.css";
+import "../gazette.css";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-montserrat",
   display: "swap",
   adjustFontFallback: true,
-  preload: true,
+  preload: false,
 });
 
-const display = Cormorant_Garamond({
+const display = EB_Garamond({
   subsets: ["latin"],
-  weight: ["700"],
-  variable: "--font-cormorant",
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-garamond",
   display: "swap",
   adjustFontFallback: true,
-  preload: true,
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -62,20 +66,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${montserrat.variable} ${display.variable} h-full bg-white`} style={{ colorScheme: "light" }}>
-      <head>
-        <link rel="preconnect" href="https://framerusercontent.com" />
-        <link rel="preconnect" href="https://storage.canalblog.com" />
-        <link rel="dns-prefetch" href="https://image.canalblog.com" />
-      </head>
-      <body className="min-h-full bg-white text-[#161616] antialiased">
+    <html lang="fr" className={`${montserrat.variable} ${display.variable}`}>
+      <body id="top">
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
+        />
         <JsonLd data={siteGraph()} />
-        <div className="flex min-h-full flex-col">
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
-        </div>
+        <a className="skip" href="#une">
+          Aller au contenu
+        </a>
+        <Suspense fallback={null}>
+          <GazetteHeader />
+        </Suspense>
+        {children}
+        <GazetteFooter />
       </body>
     </html>
   );

@@ -59,14 +59,121 @@ export function rewriteExcerpt(article: {
   return clipAtWord(`${base} ${rest}`, 160);
 }
 
+const OPTIMIZED_WIDTH = 750;
+
+export function optimizedImageUrl(src: string | null | undefined) {
+  if (!src || src.startsWith("/") || src.startsWith("data:")) return src ?? null;
+  let url: URL;
+  try {
+    url = new URL(src);
+  } catch {
+    return src;
+  }
+  if (url.protocol !== "https:") return src;
+  const host = url.hostname;
+  const allowed =
+    host === "framerusercontent.com" ||
+    host === "canalblog.com" ||
+    host.endsWith(".canalblog.com") ||
+    host.endsWith(".blogspot.com");
+  if (!allowed) return src;
+  return `/_next/image?url=${encodeURIComponent(url.href)}&w=${OPTIMIZED_WIDTH}&q=75`;
+}
+
+export function firstArticleImage(html: string | null) {
+  if (!html) return null;
+  const match = html.match(/<img\b[^>]*?\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i);
+  return match?.[1] || match?.[2] || match?.[3] || null;
+}
+
+const OWN_HOST = /^(?:www\.)?(?:rustyjamesblog\.link|rustyjames\.canalblog\.com)$/i;
+
+function articleHrefPath(href: string) {
+  const value = href.trim();
+  if (!value || value.startsWith("#") || /^mailto:/i.test(value) || /^javascript:/i.test(value)) return null;
+  if (/^https?:/i.test(value)) {
+    let url: URL;
+    try {
+      url = new URL(value);
+    } catch {
+      return null;
+    }
+    if (!OWN_HOST.test(url.hostname)) return null;
+    const path = decodeURIComponent(url.pathname).replace(/^\/+|\/+$/g, "");
+    if (!path || path.startsWith("wp-") || path.startsWith("wp-content")) return null;
+    return path.slice(0, 240);
+  }
+  if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return null;
+  const path = value.split(/[?#]/)[0].replace(/^\/+|\/+$/g, "");
+  if (!path || /\s/.test(path) || path.includes("..")) return null;
+  if (/^(?:archives\/|\d{4}\/\d{2}\/)/i.test(path) || /\.html?$/i.test(path)) return path.slice(0, 240);
+  return null;
+}
+
+const BARE_OWN_URL = /https?:\/\/(?:www\.)?(?:rustyjamesblog\.link|rustyjames\.canalblog\.com)\/[^\s<"'()]+/gi;
+
+export function internalLinkPaths(html: string) {
+  const paths = new Set<string>();
+  const add = (href: string) => {
+    const path = articleHrefPath(href);
+    if (path) paths.add(path);
+  };
+  for (const match of html.matchAll(/href\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)) {
+    add(match[1] || match[2] || "");
+  }
+  for (const match of html.matchAll(BARE_OWN_URL)) {
+    add(match[0].replace(/[.,;:)]+$/, ""));
+  }
+  return [...paths].slice(0, 200);
+}
+
+export function rewriteInternalLinks(html: string, resolved: Record<string, string>) {
+  const checked = new Set(internalLinkPaths(html));
+  html = html.replace(/<a\b([^>]*?)>([\s\S]*?)<\/a>/gi, (full, attrs: string, inner: string) => {
+    const hrefMatch = attrs.match(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)')/i);
+    if (!hrefMatch) return full;
+    const href = hrefMatch[1] ?? hrefMatch[2] ?? "";
+    const path = articleHrefPath(href);
+    if (!path || !checked.has(path)) return full;
+    const slug = resolved[path];
+    if (!slug) return inner;
+    const quote = hrefMatch[1] === undefined ? "'" : '"';
+    const next = attrs.replace(hrefMatch[0], `href=${quote}${articlePath(slug)}${quote}`);
+    return `<a${next}>${inner}</a>`;
+  });
+  return html.replace(BARE_OWN_URL, (href, offset: number, source: string) => {
+    const previous = source[offset - 1] ?? "";
+    if (previous === '"' || previous === "'" || previous === "=") return href;
+    const trimmed = href.replace(/[.,;:)]+$/, "");
+    const suffix = href.slice(trimmed.length);
+    const path = articleHrefPath(trimmed);
+    if (!path || !checked.has(path)) return href;
+    const slug = resolved[path];
+    if (!slug) return suffix;
+    return `<a href="${articlePath(slug)}">${trimmed}</a>${suffix}`;
+  });
+}
+
 export function optimizeArticleHtml(html: string) {
+  html = html.replace(/<img\b[^>]*\/filters:no_upscale\(\)\/https?%3A[^>]*>/gi, "");
+  let seen = false;
   return html.replace(/<img\b([^>]*?)\/?>/gi, (_match, raw: string) => {
-    const attrs = String(raw).trim();
+    let attrs = String(raw).trim();
+    const first = !seen;
+    seen = true;
+    if (first) {
+      const srcMatch = attrs.match(/\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i);
+      const src = srcMatch?.[1] || srcMatch?.[2] || srcMatch?.[3];
+      const optimized = optimizedImageUrl(src);
+      if (src && optimized && optimized !== src && srcMatch) {
+        attrs = attrs.replace(srcMatch[0], `src="${optimized}"`);
+      }
+    }
     const has = (name: string) => new RegExp(`\\b${name}\\s*=`, "i").test(attrs);
     const extra = [
       has("width") ? "" : 'width="1200"',
       has("height") ? "" : 'height="675"',
-      has("loading") ? "" : 'loading="lazy"',
+      has("loading") ? "" : first ? 'fetchpriority="high"' : 'loading="lazy"',
       has("decoding") ? "" : 'decoding="async"',
       has("alt") ? "" : 'alt=""',
     ].filter(Boolean);
