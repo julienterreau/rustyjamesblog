@@ -1,12 +1,8 @@
 import { ArticleCover } from "@/components/article-cover";
+import { CoverImage } from "@/components/cover-image";
 import { articlePath, formatDate, type ArticleSummary } from "@/lib/articles";
-import { optimizedImageUrl } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
-
-function cardImage(src: string) {
-  return optimizedImageUrl(src) || src;
-}
 
 export function ArticleLink({
   article,
@@ -31,15 +27,12 @@ export function ArticleLink({
     >
       {image ? (
         article.image ? (
-          <img
-            src={cardImage(article.image)}
+          <CoverImage
+            src={article.image}
             alt=""
             width={640}
             height={360}
-            {...(priority
-              ? { fetchPriority: "high" as const }
-              : { loading: "lazy" as const })}
-            decoding="async"
+            priority={priority}
             className="aspect-[16/9] w-full bg-[#161616] object-cover"
           />
         ) : (
@@ -66,15 +59,7 @@ export function SideStory({ article, kicker }: { article: ArticleSummary; kicker
   return (
     <Link href={articlePath(article.slug)} className="group block">
       {article.image ? (
-        <img
-          src={cardImage(article.image)}
-          alt=""
-          width={640}
-          height={360}
-          loading="lazy"
-          decoding="async"
-          className="h-[150px] w-full object-cover"
-        />
+        <CoverImage src={article.image} alt="" width={640} height={360} className="h-[150px] w-full object-cover" />
       ) : null}
       <p className="mt-2 text-[10px] font-bold tracking-[-0.02em] text-[#d4003c] uppercase">
         {kicker}
@@ -103,13 +88,11 @@ export function CoverCard({
       className={`group relative flex items-end overflow-hidden bg-[#161616] ${className}`}
     >
       {article.image ? (
-        <img
-          src={cardImage(article.image)}
+        <CoverImage
+          src={article.image}
           alt=""
           width={1200}
           height={675}
-          loading="lazy"
-          decoding="async"
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : null}

@@ -1,6 +1,12 @@
 import { articlePath, type Article } from "@/lib/articles";
+import { isSanityImage, sanityImageUrl } from "@/sanity/lib/image";
 import { absoluteUrl, getSiteUrl, site } from "@/lib/site";
 import type { Metadata } from "next";
+
+function metadataImage(src: string | null | undefined) {
+  if (!src) return undefined;
+  return isSanityImage(src) ? sanityImageUrl(src, 1200) : src;
+}
 
 const LEADS = ["Note de lecture", "Repère d’archive", "Dossier relu", "Fiche de lecture"] as const;
 
@@ -32,7 +38,7 @@ function sentences(plain: string) {
     .filter((sentence) => sentence.length >= 50 && sentence.length <= 220);
 }
 
-function sameTitle(left: string, right: string) {
+export function sameTitle(left: string, right: string) {
   const fold = (value: string) =>
     stripText(value)
       .normalize("NFD")
@@ -105,7 +111,7 @@ export function firstArticleImage(html: string | null) {
 
 const OWN_HOST = /^(?:www\.)?(?:rustyjamesblog\.link|rustyjames\.canalblog\.com)$/i;
 
-function articleHrefPath(href: string) {
+export function articleHrefPath(href: string) {
   const value = href.trim();
   if (!value || value.startsWith("#") || /^mailto:/i.test(value) || /^javascript:/i.test(value)) return null;
   if (/^https?:/i.test(value)) {
@@ -287,7 +293,7 @@ export function optimizeArticleHtml(html: string) {
 export function articleMetadata(article: Article): Metadata {
   const description = rewriteExcerpt(article);
   const path = articlePath(article.slug);
-  const image = article.image ?? undefined;
+  const image = metadataImage(article.image);
 
   return {
     title: article.title,
@@ -356,6 +362,7 @@ export function siteGraph() {
 export function articleJsonLd(article: Article, description: string) {
   const url = absoluteUrl(articlePath(article.slug));
   const home = getSiteUrl();
+  const image = metadataImage(article.image);
 
   return {
     "@context": "https://schema.org",
@@ -371,7 +378,7 @@ export function articleJsonLd(article: Article, description: string) {
         dateModified: article.published_at ?? undefined,
         articleSection: article.tags[0],
         keywords: article.tags.slice(0, 8).join(", ") || undefined,
-        image: article.image ? [article.image] : undefined,
+        image: image ? [image] : undefined,
         author: {
           "@type": "Person",
           name: article.author || "Rusty James",

@@ -71,6 +71,10 @@ export function themeById(id: string | null | undefined) {
   return THEMES.find((theme) => theme.id === id) ?? null;
 }
 
+export function themesForTags(tags: string[]) {
+  return THEMES.filter((theme) => theme.tags.some((tag) => tags.includes(tag)));
+}
+
 export function themeForArticle(tags: string[], title = "") {
   const names = new Set(tags.map((tag) => tag.toLocaleLowerCase("fr-FR")));
   const fromTags = THEMES.find((theme) => theme.tags.some((tag) => names.has(tag)));

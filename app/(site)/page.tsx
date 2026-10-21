@@ -1,9 +1,9 @@
 import { ArticleCover } from "@/components/article-cover";
+import { CoverImage } from "@/components/cover-image";
 import { articlePath, getGazette, type ArticleSummary } from "@/lib/articles";
 import { archivesHref } from "@/lib/archive-links";
 import { THEMES, themeById } from "@/lib/themes";
 import { GazetteSubscribe } from "@/components/gazette-subscribe";
-import { optimizedImageUrl } from "@/lib/seo";
 import Link from "next/link";
 import { preload } from "react-dom";
 import { Suspense } from "react";
@@ -64,10 +64,6 @@ function parisDate(iso: string | null) {
 
 function plain(value: string | null) {
   return (value ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function picture(article: ArticleSummary) {
-  return optimizedImageUrl(article.image) || article.image;
 }
 
 async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams> }) {
@@ -431,13 +427,12 @@ function Foot({ article }: { article: ArticleSummary }) {
 }
 
 function Lead({ article }: { article: ArticleSummary }) {
-  const src = picture(article);
   const date = parisDate(article.published_at);
   return (
     <article className="lead-card">
       <div className="lc-media">
-        {src ? (
-          <img src={src} alt="" fetchPriority="high" />
+        {article.image ? (
+          <CoverImage src={article.image} alt="" priority bare fill />
         ) : (
           <ArticleCover title={article.title} tags={article.tags} slug={article.slug} />
         )}
@@ -458,13 +453,12 @@ function Lead({ article }: { article: ArticleSummary }) {
 }
 
 function Row({ article }: { article: ArticleSummary }) {
-  const src = picture(article);
   const date = parisDate(article.published_at);
   return (
     <article className="row-card has-media">
       <div className="rc-media">
-        {src ? (
-          <img src={src} alt="" loading="lazy" />
+        {article.image ? (
+          <CoverImage src={article.image} alt="" bare fill />
         ) : (
           <ArticleCover title={article.title} tags={article.tags} slug={article.slug} />
         )}

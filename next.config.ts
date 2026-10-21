@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.canalblog.com" },
       { protocol: "https", hostname: "rustyjamesblog.link" },
       { protocol: "https", hostname: "**.blogspot.com" },
+      { protocol: "https", hostname: "cdn.sanity.io", pathname: "/images/**" },
     ],
   },
   experimental: {

@@ -1,3 +1,4 @@
+import { ArticlePortable } from "@/components/article-portable";
 import { articlePath, formatDate, getArticle, resolveArchiveSlugs } from "@/lib/articles";
 import { JsonLd } from "@/components/json-ld";
 import {
@@ -11,6 +12,7 @@ import {
   rewriteInternalLinks,
   stripDuplicateHeading,
 } from "@/lib/seo";
+import { isSanityImage, sanityImageUrl } from "@/sanity/lib/image";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { preload } from "react-dom";
@@ -29,7 +31,8 @@ export async function generateMetadata({
   const article = await getArticle(slug.join("/"));
   if (!article) return { title: "Article introuvable", robots: { index: false, follow: true } };
 
-  const image = optimizedImageUrl(firstArticleImage(article.content_html) ?? article.image);
+  const raw = article.body?.length ? article.image : (firstArticleImage(article.content_html) ?? article.image);
+  const image = raw && isSanityImage(raw) ? sanityImageUrl(raw, 750) : optimizedImageUrl(raw);
   if (image) preload(image, { as: "image", fetchPriority: "high" });
 
   return articleMetadata(article);
@@ -80,7 +83,9 @@ async function ArticleView({ params }: { params: Promise<ArticleParams> }) {
         <b>Par {article.author || "rusty james"}</b>
         {date ? <time dateTime={published}>{date}</time> : null}
       </div>
-      {article.content_html ? (
+      {article.body?.length ? (
+        <ArticlePortable body={article.body} title={article.title} />
+      ) : article.content_html ? (
         <ArticleHtml html={article.content_html} title={article.title} />
       ) : null}
     </article>
