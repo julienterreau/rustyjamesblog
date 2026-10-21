@@ -9,9 +9,6 @@ export const Media: CollectionConfig = {
     update: postAccess,
     delete: postAccess,
     read: () => true,
-    create: ({ req }) => Boolean(req.user),
-    update: ({ req }) => Boolean(req.user),
-    delete: ({ req }) => Boolean(req.user),
   },
   upload: {
     mimeTypes: ["image/*"],
