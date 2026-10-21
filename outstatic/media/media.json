@@ -1,7 +1,19 @@
 {
-  "commit": "f6a7283330be99f5200d0e1913d451e0256220ab",
-  "generated": "2026-10-21T13:50:31.997Z",
+  "commit": "7be0d2b32c9be7ec661003279bf09b944b1c725e",
+  "generated": "2026-10-21T13:50:54.732Z",
   "media": [
+    {
+      "__outstatic": {
+        "commit": "7be0d2b32c9be7ec661003279bf09b944b1c725e",
+        "hash": "730811943",
+        "path": "app/(site)/archives/brandn_gold_luxury_logo_75512e88-Q4OD.jpg"
+      },
+      "alt": "",
+      "filename": "brandn_gold_luxury_logo_75512e88-Q4OD.jpg",
+      "publishedAt": "2026-10-21T13:50:54.732Z",
+      "source": "rusty",
+      "type": "image"
+    },
     {
       "__outstatic": {
         "commit": "f6a7283330be99f5200d0e1913d451e0256220ab",
