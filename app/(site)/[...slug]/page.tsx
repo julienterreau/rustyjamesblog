@@ -9,6 +9,7 @@ import {
   optimizedImageUrl,
   rewriteExcerpt,
   rewriteInternalLinks,
+  stripDuplicateHeading,
 } from "@/lib/seo";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -16,6 +17,8 @@ import { preload } from "react-dom";
 import { Suspense } from "react";
 
 type ArticleParams = { slug: string[] };
+
+export const instant = false;
 
 export async function generateMetadata({
   params,
@@ -77,20 +80,20 @@ async function ArticleView({ params }: { params: Promise<ArticleParams> }) {
         <b>Par {article.author || "rusty james"}</b>
         {date ? <time dateTime={published}>{date}</time> : null}
       </div>
-      <p className="content">{description}</p>
       {article.content_html ? (
-        <ArticleHtml html={article.content_html} />
+        <ArticleHtml html={article.content_html} title={article.title} />
       ) : null}
     </article>
   );
 }
 
-async function ArticleHtml({ html }: { html: string }) {
+async function ArticleHtml({ html, title }: { html: string; title: string }) {
   const resolved = await resolveArchiveSlugs(internalLinkPaths(html));
+  const body = stripDuplicateHeading(html, title);
   return (
     <div
-      className="content article-body"
-      dangerouslySetInnerHTML={{ __html: rewriteInternalLinks(optimizeArticleHtml(html), resolved) }}
+      className="content article-body prose prose-invert max-w-none"
+      dangerouslySetInnerHTML={{ __html: rewriteInternalLinks(optimizeArticleHtml(body), resolved) }}
     />
   );
 }

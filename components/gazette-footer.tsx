@@ -2,6 +2,7 @@ import { GazetteSubscribe } from "@/components/gazette-subscribe";
 import { archivesHref } from "@/lib/archive-links";
 import { getGazette } from "@/lib/articles";
 import Link from "next/link";
+import { Suspense } from "react";
 
 const POLES = ["Géopolitique & Société", "Sciences & Technologies", "Ésotérisme & Occulte"];
 
@@ -55,7 +56,9 @@ export async function GazetteFooter() {
             Recevez directement les rapports de déclassification, les enquêtes censurées et les synthèses stratégiques
             du blog.
           </p>
-          <GazetteSubscribe footer />
+          <Suspense fallback={<div className="ff-row" aria-hidden="true" />}>
+            <GazetteSubscribe footer />
+          </Suspense>
         </div>
       </div>
       <div className="foot-bottom">
@@ -63,6 +66,12 @@ export async function GazetteFooter() {
           <span>© 2009–2026 Rusty James News. Journalisme d&apos;investigation citoyen.</span>
           <span className="foot-links">
             <a href="#top">Haut de page</a>
+            <span className="foot-made">
+              Made by{" "}
+              <a href="https://brandionary.com" target="_blank" rel="noopener noreferrer">
+                Brandionary
+              </a>
+            </span>
           </span>
         </div>
       </div>

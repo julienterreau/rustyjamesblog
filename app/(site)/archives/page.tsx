@@ -11,6 +11,8 @@ import { Suspense } from "react";
 
 type ArchiveParams = { page?: string; tag?: string; date?: string; month?: string; year?: string; from?: string; to?: string };
 
+export const instant = false;
+
 function yearParam(value?: string) {
   if (!value || !/^\d{4}$/.test(value)) return null;
   const year = Number(value);

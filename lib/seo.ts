@@ -32,6 +32,23 @@ function sentences(plain: string) {
     .filter((sentence) => sentence.length >= 50 && sentence.length <= 220);
 }
 
+function sameTitle(left: string, right: string) {
+  const fold = (value: string) =>
+    stripText(value)
+      .normalize("NFD")
+      .replace(/\p{M}/gu, "")
+      .toLocaleLowerCase("fr-FR")
+      .replace(/[^a-z0-9]+/g, "");
+  const a = fold(left);
+  const b = fold(right);
+  if (!a || !b) return false;
+  return a === b || (a.length > 24 && b.length > 24 && (a.startsWith(b) || b.startsWith(a)));
+}
+
+export function stripDuplicateHeading(html: string, title: string) {
+  return html.replace(/<h[1-2]\b[^>]*>[\s\S]*?<\/h[1-2]>/i, (heading) => (sameTitle(heading, title) ? "" : heading));
+}
+
 export function rewriteExcerpt(article: {
   slug: string;
   title: string;
@@ -154,7 +171,91 @@ export function rewriteInternalLinks(html: string, resolved: Record<string, stri
   });
 }
 
+function unwrapAswiftHosts(html: string) {
+  const open = /<div\b[^>]*\bid=["']aswift_\d+_host["'][^>]*>/gi;
+  let result = "";
+  let cursor = 0;
+  for (const match of html.matchAll(open)) {
+    const start = match.index ?? 0;
+    if (start < cursor) continue;
+    const innerStart = start + match[0].length;
+    const close = matchingCloseDiv(html, innerStart);
+    if (close < 0) continue;
+    result += html.slice(cursor, start) + html.slice(innerStart, close);
+    cursor = close + "</div>".length;
+  }
+  return result + html.slice(cursor);
+}
+
+function matchingClose(html: string, from: number, tag: string) {
+  const token = new RegExp(`</?${tag}\\b[^>]*>`, "gi");
+  token.lastIndex = from;
+  let depth = 1;
+  let match: RegExpExecArray | null;
+  while ((match = token.exec(html))) {
+    depth += match[0].startsWith("</") ? -1 : 1;
+    if (depth === 0) return match.index;
+  }
+  return -1;
+}
+
+function matchingCloseDiv(html: string, from: number) {
+  return matchingClose(html, from, "div");
+}
+
+function unwrapAdsByGoogle(html: string) {
+  const open = /<ins\b[^>]*\bclass\s*=\s*(?:"[^"]*\badsbygoogle\b[^"]*"|'[^']*\badsbygoogle\b[^']*')[^>]*>/gi;
+  let result = "";
+  let cursor = 0;
+  for (const match of html.matchAll(open)) {
+    const start = match.index ?? 0;
+    if (start < cursor) continue;
+    const innerStart = start + match[0].length;
+    const close = matchingClose(html, innerStart, "ins");
+    if (close < 0) continue;
+    const inner = html.slice(innerStart, close);
+    const text = inner.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    result += html.slice(cursor, start) + (text.length > 40 ? inner : "");
+    cursor = close + "</ins>".length;
+  }
+  return result + html.slice(cursor);
+}
+
+function stripStyleAttributes(html: string) {
+  return html.replace(/<[a-zA-Z][^>]*>/g, (tag) => {
+    let result = "";
+    let index = 0;
+    while (index < tag.length) {
+      const styleAt = tag.slice(index).search(/\sstyle\s*=/i);
+      if (styleAt < 0) return result + tag.slice(index);
+      result += tag.slice(index, index + styleAt);
+      let cursor = index + styleAt + tag.slice(index + styleAt).match(/^\sstyle\s*=\s*/i)![0].length;
+      const quote = tag[cursor];
+      if (quote !== '"' && quote !== "'") {
+        while (cursor < tag.length && tag[cursor] !== " " && tag[cursor] !== ">") cursor += 1;
+        index = cursor;
+        continue;
+      }
+      cursor += 1;
+      let end = tag.length - 1;
+      for (let mark = cursor; mark < tag.length; mark += 1) {
+        if (tag[mark] !== quote) continue;
+        const next = tag[mark + 1] ?? "";
+        if (next === ">" || /\s/.test(next)) {
+          end = mark;
+          break;
+        }
+      }
+      index = end + 1;
+    }
+    return result;
+  });
+}
+
 export function optimizeArticleHtml(html: string) {
+  html = unwrapAswiftHosts(html);
+  html = unwrapAdsByGoogle(html);
+  html = stripStyleAttributes(html);
   html = html.replace(/<img\b[^>]*\/filters:no_upscale\(\)\/https?%3A[^>]*>/gi, "");
   let seen = false;
   return html.replace(/<img\b([^>]*?)\/?>/gi, (_match, raw: string) => {
@@ -170,9 +271,11 @@ export function optimizeArticleHtml(html: string) {
       }
     }
     const has = (name: string) => new RegExp(`\\b${name}\\s*=`, "i").test(attrs);
+    const ampWidth = attrs.match(/\bdata-amp-width\s*=\s*"(\d+)"/i)?.[1];
+    const ampHeight = attrs.match(/\bdata-amp-height\s*=\s*"(\d+)"/i)?.[1];
     const extra = [
-      has("width") ? "" : 'width="1200"',
-      has("height") ? "" : 'height="675"',
+      has("width") ? "" : `width="${ampWidth || "1200"}"`,
+      has("height") ? "" : `height="${ampHeight || "675"}"`,
       has("loading") ? "" : first ? 'fetchpriority="high"' : 'loading="lazy"',
       has("decoding") ? "" : 'decoding="async"',
       has("alt") ? "" : 'alt=""',

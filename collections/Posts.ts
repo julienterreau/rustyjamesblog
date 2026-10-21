@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { canPost, postAccess } from "@/lib/roles";
 import { syncPublishedPost } from "../lib/publish-post";
 
 function slugify(value: string) {
@@ -22,11 +23,12 @@ export const Posts: CollectionConfig = {
     drafts: true,
   },
   access: {
-    create: ({ req }) => Boolean(req.user),
-    update: ({ req }) => Boolean(req.user),
-    delete: ({ req }) => Boolean(req.user),
+    create: postAccess,
+    update: postAccess,
+    delete: postAccess,
+    readVersions: postAccess,
     read: ({ req }) => {
-      if (req.user) return true;
+      if (canPost(req.user)) return true;
       return { _status: { equals: "published" } };
     },
   },

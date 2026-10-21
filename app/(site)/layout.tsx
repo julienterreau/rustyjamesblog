@@ -82,7 +82,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <GazetteHeader />
         </Suspense>
         {children}
-        <GazetteFooter />
+        <Suspense fallback={<footer className="site-foot" aria-hidden="true" />}>
+          <GazetteFooter />
+        </Suspense>
       </body>
     </html>
   );

@@ -23,6 +23,17 @@ function asStrings(value: unknown): string[] {
   return value.filter((item): item is string => typeof item === "string");
 }
 
+function articleCacheTag(slug: string) {
+  const tag = `article:${slug}`;
+  if (tag.length <= 240) return tag;
+  let hash = 2166136261;
+  for (let index = 0; index < slug.length; index += 1) {
+    hash ^= slug.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `article:${(hash >>> 0).toString(16)}`;
+}
+
 type ArticleRow = {
   slug: string;
   title: string;
@@ -237,7 +248,7 @@ export async function resolveArchiveSlugs(paths: string[]) {
 export async function getArticle(slug: string) {
   "use cache";
   cacheLife("hours");
-  cacheTag("articles", `article:${slug}`);
+  cacheTag("articles", articleCacheTag(slug));
   const result = await pool.query<ArticleRow>(
     `SELECT slug, title, excerpt, content_html, published_at, author, tags, image_urls
      FROM articles
