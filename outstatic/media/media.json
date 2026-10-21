@@ -1,6 +1,18 @@
 {
-  "commit": "",
-  "generated": "2026-10-21T13:50:19.876Z",
+  "commit": "f6a7283330be99f5200d0e1913d451e0256220ab",
+  "generated": "2026-10-21T13:50:31.997Z",
   "media": [
+    {
+      "__outstatic": {
+        "commit": "f6a7283330be99f5200d0e1913d451e0256220ab",
+        "hash": "2218063325",
+        "path": "app/(site)/archives/dreamstime_m_148999056-2048x1152-1-980x551-gzMD.jpg"
+      },
+      "alt": "",
+      "filename": "dreamstime_m_148999056-2048x1152-1-980x551-gzMD.jpg",
+      "publishedAt": "2026-10-21T13:50:31.997Z",
+      "source": "rusty",
+      "type": "image"
+    }
   ]
 }
