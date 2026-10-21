@@ -5,6 +5,9 @@ export const Media: CollectionConfig = {
   labels: { singular: "Image", plural: "Images" },
   access: {
     read: () => true,
+    create: ({ req }) => Boolean(req.user),
+    update: ({ req }) => Boolean(req.user),
+    delete: ({ req }) => Boolean(req.user),
   },
   upload: {
     mimeTypes: ["image/*"],
