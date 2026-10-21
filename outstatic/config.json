@@ -1,0 +1,15 @@
+{
+  "media": [
+    {
+      "categories": [
+        "image"
+      ],
+      "input": "app/(site)/archives",
+      "label": "rusty",
+      "name": "rusty",
+      "output": "https://www.rustyjamesblog.link"
+    }
+  ],
+  "publicMediaPath": "https://www.rustyjamesblog.link/",
+  "repoMediaPath": "app/(site)/archives/"
+}
