@@ -8,7 +8,7 @@ if (!projectId || !dataset) {
   throw new Error("NEXT_PUBLIC_SANITY_PROJECT_ID et NEXT_PUBLIC_SANITY_DATASET sont requis.");
 }
 if (!token) {
-  throw new Error("SANITY_API_WRITE_TOKEN est absent. Il ne sert qu'à la migration.");
+  throw new Error("SANITY_API_WRITE_TOKEN est absent.");
 }
 
 export const writeClient = createClient({

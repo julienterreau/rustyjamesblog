@@ -1,7 +1,12 @@
 "use server";
 
-import config from "@payload-config";
-import { getPayload } from "payload";
+import { addNewsletterContact } from "@/lib/newsletter";
+import { writeClient } from "@/sanity/lib/write-client";
+import { createHash } from "node:crypto";
+
+function subscriberId(email: string) {
+  return `subscriber-${createHash("sha256").update(email).digest("hex").slice(0, 32)}`;
+}
 
 export async function subscribeToArticles(
   _previous: { ok?: string; error?: string } | null,
@@ -15,22 +20,13 @@ export async function subscribeToArticles(
   }
 
   try {
-    const payload = await getPayload({ config });
-    const existing = await payload.find({
-      collection: "subscribers",
-      depth: 0,
-      limit: 1,
-      overrideAccess: true,
-      where: { email: { equals: email } },
-    });
-    if (existing.totalDocs > 0) return { ok: "Vous êtes déjà inscrit." };
-
-    await payload.create({
-      collection: "subscribers",
-      data: { email },
-      overrideAccess: true,
-    });
-    return { ok: "Inscription enregistrée. Les prochains articles vous seront envoyés." };
+    const id = subscriberId(email);
+    const [existing] = await Promise.all([
+      writeClient.getDocument(id),
+      addNewsletterContact(email),
+    ]);
+    if (!existing) await writeClient.createIfNotExists({ _id: id, _type: "subscriber", email });
+    return existing ? { ok: "Vous êtes déjà inscrit." } : { ok: "Inscription enregistrée." };
   } catch {
     return { error: "L’inscription est indisponible pour le moment." };
   }

@@ -1,4 +1,3 @@
-import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -30,15 +29,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-const payloadConfig = withPayload(nextConfig);
-
-export default {
-  ...payloadConfig,
-  headers: async () => {
-    const headers = (await payloadConfig.headers?.()) ?? [];
-    return headers.map((item) => ({
-      ...item,
-      headers: item.headers.filter((header) => header.key !== "Accept-CH" && header.key !== "Critical-CH"),
-    }));
-  },
-};
+export default nextConfig;

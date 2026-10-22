@@ -209,9 +209,6 @@ export async function listArticles(
   date?: string,
   period?: { month?: string | null; fromYear?: number | null; toYear?: number | null },
 ) {
-  "use cache";
-  cacheLife("hours");
-  cacheTag("articles");
   const requested = Number.isFinite(page) && page >= 1 ? Math.floor(page) : 1;
   const filter = tag?.trim() || null;
   const day = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
@@ -247,9 +244,6 @@ export async function listArticles(
 }
 
 export async function latestArchiveMonth(tag?: string) {
-  "use cache";
-  cacheLife("hours");
-  cacheTag("articles");
   const filter = tag?.trim() || null;
   const catalog = await loadCatalog();
   const article = catalog.find((item) => item.published_at && (!filter || item.tags.includes(filter)));
@@ -257,9 +251,6 @@ export async function latestArchiveMonth(tag?: string) {
 }
 
 export async function listArchiveDays(tag?: string) {
-  "use cache";
-  cacheLife("hours");
-  cacheTag("articles");
   const filter = tag?.trim() || null;
   const catalog = await loadCatalog();
   const days = new Set<string>();
@@ -272,9 +263,6 @@ export async function listArchiveDays(tag?: string) {
 }
 
 export async function getHomepage() {
-  "use cache";
-  cacheLife("hours");
-  cacheTag("articles");
   const catalog = await loadCatalog();
   const counts = new Map<string, number>();
   for (const article of catalog) {
@@ -294,10 +282,6 @@ export async function getHomepage() {
 }
 
 export async function resolveArchiveSlugs(paths: string[]) {
-  "use cache";
-  cacheLife("hours");
-  cacheTag("articles");
-
   const cleaned = [
     ...new Set(
       paths
@@ -380,9 +364,6 @@ export async function getArticle(slug: string) {
 }
 
 export async function listSitemapArticles() {
-  "use cache";
-  cacheLife("days");
-  cacheTag("articles");
   const catalog = await loadCatalog();
   return catalog.map((article) => ({
     slug: article.slug,
@@ -415,10 +396,6 @@ export async function getGazette(options: {
   year: number | null;
   limit: number;
 }): Promise<GazetteData> {
-  "use cache";
-  cacheLife("hours");
-  cacheTag("articles");
-
   const tags = options.tags?.map((tag) => tag.trim()).filter(Boolean) ?? [];
   const theme = themeForTagList(tags.length ? tags : null);
   const needle = options.q?.trim().replace(/[%_]/g, "").slice(0, 80) || null;
