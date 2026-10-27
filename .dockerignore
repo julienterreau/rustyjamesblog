@@ -1,0 +1,31 @@
+# Dépendances (réinstallées pendant le build)
+node_modules
+**/node_modules
+
+# Builds et caches Next.js
+.next
+out
+.turbo
+.vercel
+
+# Git et outils
+.git
+.github
+.vscode
+.idea
+
+# Logs et fichiers système
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Variables d'environnement locales (Coolify injecte les siennes)
+.env
+.env.*
+!.env.example
+
+# Tests et docs
+coverage
+*.md
+!README.md
