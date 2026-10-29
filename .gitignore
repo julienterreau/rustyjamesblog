@@ -47,3 +47,4 @@ next-env.d.ts
 # payload uploads
 /public/media/**
 !/public/media/.gitkeep
+/public/sql/

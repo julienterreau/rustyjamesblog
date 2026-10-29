@@ -1,6 +1,7 @@
 # Dépendances (réinstallées pendant le build)
 node_modules
 **/node_modules
+public/sql
 
 # Builds et caches Next.js
 .next
