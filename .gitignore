@@ -47,3 +47,8 @@ next-env.d.ts
 # payload uploads
 /public/media/**
 !/public/media/.gitkeep
+
+# giant migration artefacts: never commit generated export files
+/public/sql/output/**
+/public/sql/articles.xml
+/migration-report.md
