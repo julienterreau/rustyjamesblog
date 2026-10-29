@@ -18,9 +18,9 @@ FROM node:24-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
-ENV PORT=8000
+ENV PORT=8082
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-EXPOSE 8000
+EXPOSE 8082
 CMD ["node", "server.js"]
