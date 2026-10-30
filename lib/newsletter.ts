@@ -1,5 +1,5 @@
 import { absoluteUrl } from "@/lib/site";
-import { client } from "@/sanity/lib/client";
+import { apiClient } from "@/sanity/lib/client";
 import { Resend } from "resend";
 
 const SEGMENT_NAME = "Abonnés";
@@ -83,7 +83,7 @@ export async function sendNewArticle(id: string) {
   if (!process.env.RESEND_API_KEY?.trim() || !from) return;
   if (id.startsWith("drafts.")) return;
 
-  const article = await client.fetch<{ title?: string | null; slug?: string | null; excerpt?: string | null } | null>(
+  const article = await apiClient.fetch<{ title?: string | null; slug?: string | null; excerpt?: string | null } | null>(
     `*[_id == $id && _type == "article"][0]{ title, "slug": slug.current, excerpt }`,
     { id },
   );

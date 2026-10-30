@@ -1,7 +1,6 @@
 import { ArticleCover } from "@/components/article-cover";
 import { CoverImage } from "@/components/cover-image";
 import { articlePath, formatDate, type ArticleSummary } from "@/lib/articles";
-import Image from "next/image";
 import Link from "next/link";
 
 export function ArticleLink({
@@ -104,36 +103,6 @@ export function CoverCard({
           className={`mt-2 font-display font-bold leading-[1.15] tracking-[-0.02em] text-white underline-offset-2 group-hover:underline ${titleClassName}`}
         >
           {article.title}
-        </h3>
-      </div>
-    </Link>
-  );
-}
-
-export function DossierCard({
-  href,
-  image,
-  kicker,
-  title,
-}: {
-  href: string;
-  image: string;
-  kicker: string;
-  title: string;
-}) {
-  return (
-    <Link href={href} className="group relative flex h-[280px] items-end overflow-hidden bg-[#161616]">
-      <Image
-        src={image}
-        alt=""
-        fill
-        sizes="(min-width: 768px) 50vw, 100vw"
-        className="object-cover"
-      />
-      <div className="relative z-10 w-full bg-gradient-to-t from-black/85 to-transparent px-5 pt-12 pb-5">
-        <p className="text-[10px] font-bold tracking-[-0.02em] text-white uppercase">{kicker}</p>
-        <h3 className="mt-2 font-display text-[38px] leading-[1.15] font-bold tracking-[-0.02em] text-white underline-offset-2 group-hover:underline">
-          {title}
         </h3>
       </div>
     </Link>

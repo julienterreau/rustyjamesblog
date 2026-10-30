@@ -5,8 +5,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false, 
   htmlLimitedBots: /.*/,
   images: {
-    formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 60 * 60 * 24 * 30,
+    formats: ["image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 7,
+    maximumDiskCacheSize: 512_000_000,
     remotePatterns: [
       { protocol: "https", hostname: "framerusercontent.com", pathname: "/images/**" },
       { protocol: "https", hostname: "**.canalblog.com" },

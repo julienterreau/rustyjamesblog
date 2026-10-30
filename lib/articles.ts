@@ -1,4 +1,4 @@
-import { client } from "@/sanity/lib/client";
+import { apiClient } from "@/sanity/lib/client";
 import { sanityImageSource } from "@/sanity/lib/image";
 import { THEMES } from "@/lib/themes";
 import type { PortableTextBlock } from "@portabletext/react";
@@ -116,7 +116,7 @@ const ARTICLE_PROJECTION = `{
   modifiedOn,
   "author": author->name,
   tags,
-  imageUrls,
+  "imageUrls": imageUrls[0...4],
   "cover": cover{ "ref": asset._ref, crop, hotspot },
   "categories": categories[]._ref
 }`;
@@ -174,9 +174,9 @@ function compareArticles(left: CatalogArticle, right: CatalogArticle) {
 
 async function loadCatalog() {
   "use cache";
-  cacheLife("hours");
+  cacheLife("days");
   cacheTag("articles");
-  const rows = await client.fetch<RawArticle[]>(`*[_type == "article"]${ARTICLE_PROJECTION}`);
+  const rows = await apiClient.fetch<RawArticle[]>(`*[_type == "article"]${ARTICLE_PROJECTION}`);
   return rows.flatMap((row) => {
     const article = toSummary(row);
     return article ? [article] : [];
@@ -333,9 +333,9 @@ export async function resolveArchiveSlugs(paths: string[]) {
 
 export async function getArticle(slug: string) {
   "use cache";
-  cacheLife("hours");
+  cacheLife("days");
   cacheTag("articles", articleCacheTag(slug));
-  const row = await client.fetch<RawArticle | null>(
+  const row = await apiClient.fetch<RawArticle | null>(
     `*[_type == "article" && slug.current == $slug][0]{
       "id": _id,
       "slug": slug.current,
@@ -345,7 +345,7 @@ export async function getArticle(slug: string) {
       modifiedOn,
       "author": author->name,
       tags,
-      imageUrls,
+      "imageUrls": imageUrls[0...4],
       "cover": cover{ "ref": asset._ref, crop, hotspot },
       "categories": categories[]._ref,
       legacyHtml,

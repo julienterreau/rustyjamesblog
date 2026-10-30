@@ -11,6 +11,14 @@ export const client = createClient({
   projectId,
   dataset,
   apiVersion: "2026-10-21",
+  useCdn: true,
+  perspective: "published",
+});
+
+export const apiClient = createClient({
+  projectId,
+  dataset,
+  apiVersion: "2026-10-21",
   useCdn: false,
   perspective: "published",
 });
