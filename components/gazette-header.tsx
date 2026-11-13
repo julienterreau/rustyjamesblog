@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/", label: "Accueil" },
   { href: "/#une", label: "À la une" },
   { href: "/archives", label: "Archives" },
+  { href: "/visiteurs", label: "Visiteurs" },
   { href: "/#categories", label: "Catégories" },
 ];
 
@@ -39,9 +40,13 @@ export function GazetteHeader() {
                   ? pathname === "/archives"
                     ? "page"
                     : undefined
-                  : link.label === "Accueil" && home
-                    ? "page"
-                    : undefined
+                  : link.href === "/visiteurs"
+                    ? pathname === "/visiteurs"
+                      ? "page"
+                      : undefined
+                    : link.label === "Accueil" && home
+                      ? "page"
+                      : undefined
               }
             >
               {link.label}
