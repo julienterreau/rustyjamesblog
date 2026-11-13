@@ -19,8 +19,13 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=8082
+ENV GEOIP_DB_PATH=/app/data/GeoLite2-City.mmdb
+RUN apt-get update && apt-get install -y --no-install-recommends tar && rm -rf /var/lib/apt/lists/*
+COPY scripts/update-geolite.mjs ./scripts/update-geolite.mjs
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+RUN chmod +x docker-entrypoint.sh
 EXPOSE 8082
-CMD ["node", "server.js"]
+CMD ["./docker-entrypoint.sh"]
