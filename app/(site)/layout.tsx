@@ -3,6 +3,7 @@ import { EB_Garamond, Montserrat } from "next/font/google";
 import { Suspense } from "react";
 import { GazetteFooter } from "@/components/gazette-footer";
 import { GazetteHeader } from "@/components/gazette-header";
+import { VisitTracker } from "@/components/visit-tracker";
 import { JsonLd } from "@/components/json-ld";
 import { siteGraph } from "@/lib/seo";
 import { getSiteUrl, site } from "@/lib/site";
@@ -84,6 +85,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <Suspense fallback={<footer className="site-foot" aria-hidden="true" />}>
           <GazetteFooter />
+        </Suspense>
+        <Suspense fallback={null}>
+          <VisitTracker />
         </Suspense>
       </body>
     </html>
