@@ -53,6 +53,7 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
     };
   }, [selected]);
 
+  const lands = countryPoints(points);
   const ordered = [...points].sort((a, b) => {
     const aOn = pointKey(a) === selected;
     const bOn = pointKey(b) === selected;
@@ -61,7 +62,8 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
   });
 
   return (
-    <div className="readers-stage" ref={stageRef}>
+    <div ref={stageRef}>
+    <div className="readers-stage">
       <svg ref={svgRef} className="readers-svg" viewBox={`0 0 ${MAP_SIZE} ${MAP_SIZE}`} onClick={selectAt}>
         <title>Terre plate, pôle Nord au centre</title>
         <defs>
@@ -192,7 +194,7 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
             >
               {radius >= 8 ? <circle className="readers-pulse" r={radius} fill="var(--red)" /> : null}
               <circle className={point.approximate ? "readers-pin is-approx" : "readers-pin"} r={active ? radius + 2 : radius} />
-              <circle className="readers-focus" r={radius + 5} />
+              <circle className={active ? "readers-focus is-on" : "readers-focus"} r={radius + 6} />
               <circle r={hit} fill="transparent" />
             </g>
           );
@@ -200,7 +202,33 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
       </svg>
       {open ? <VisitCard point={open} onClose={() => setSelected(null)} /> : null}
     </div>
+    {lands.length > 0 ? (
+      <ul className="readers-lands">
+        {lands.map((point) => {
+          const key = pointKey(point);
+          const active = key === selected;
+          return (
+            <li key={point.code || key}>
+              <button type="button" aria-pressed={active} onClick={() => setSelected(active ? null : key)}>
+                <span className="readers-lands-dot" aria-hidden="true" />
+                {point.country}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    ) : null}
+    </div>
   );
+}
+
+function countryPoints(points: MapPoint[]) {
+  const byCode = new Map<string, MapPoint>();
+  for (const point of [...points].sort((a, b) => b.count - a.count)) {
+    const code = point.code || point.country;
+    if (!byCode.has(code)) byCode.set(code, point);
+  }
+  return [...byCode.values()];
 }
 
 function VisitCard({ point, onClose }: { point: MapPoint; onClose: () => void }) {
