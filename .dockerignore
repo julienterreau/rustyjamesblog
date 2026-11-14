@@ -4,7 +4,6 @@ node_modules
 public/sql
 backup
 scripts/**
-!scripts/update-geolite.mjs
 outstatic
 
 # Builds et caches Next.js

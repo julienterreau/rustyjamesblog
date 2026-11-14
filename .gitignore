@@ -44,9 +44,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# GeoLite2 (licence MaxMind, ne pas versionner)
-/data/*.mmdb
-
 # payload uploads
 /public/media/**
 !/public/media/.gitkeep

@@ -2,15 +2,30 @@
 
 import { MAP_CENTER, MAP_CLIP, MAP_RADIUS, MAP_SIZE } from "@/lib/visits/map-metrics";
 import type { MapPoint } from "@/lib/visits/types";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 const TICKS = ["0°", "90°E", "180°", "90°O"] as const;
 
 export function ReaderMap({ points }: { points: MapPoint[] }) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [wideHit, setWideHit] = useState(false);
   const open = points.find((point) => pointKey(point) === selected) ?? null;
+
+  function selectAt(event: MouseEvent<SVGElement>) {
+    const svg = svgRef.current;
+    const matrix = svg?.getScreenCTM();
+    if (!svg || !matrix) return;
+    const local = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+    const nearest = closestPoint(points, local.x, local.y, wideHit ? 36 : 18);
+    if (!nearest) {
+      setSelected(null);
+      return;
+    }
+    const key = pointKey(nearest);
+    setSelected(key === selected ? null : key);
+  }
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 1000px)");
@@ -47,11 +62,7 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
 
   return (
     <div className="readers-stage" ref={stageRef}>
-      <svg
-        className="readers-svg"
-        viewBox={`0 0 ${MAP_SIZE} ${MAP_SIZE}`}
-        onClick={() => setSelected(null)}
-      >
+      <svg ref={svgRef} className="readers-svg" viewBox={`0 0 ${MAP_SIZE} ${MAP_SIZE}`} onClick={selectAt}>
         <title>Terre plate, pôle Nord au centre</title>
         <defs>
           <radialGradient id="readers-ice" cx="50%" cy="50%" r="50%">
@@ -67,8 +78,8 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
             <circle cx={MAP_CENTER} cy={MAP_CENTER} r={MAP_CLIP} />
           </clipPath>
         </defs>
-        <circle cx={MAP_CENTER} cy={MAP_CENTER} r={MAP_RADIUS + 44} fill="none" stroke="var(--line)" />
-        <circle cx={MAP_CENTER} cy={MAP_CENTER} r={MAP_RADIUS + 30} fill="none" stroke="var(--high)" />
+        <circle cx={MAP_CENTER} cy={MAP_CENTER} r={MAP_RADIUS + 44} fill="none" stroke="var(--line)" vectorEffect="non-scaling-stroke" />
+        <circle cx={MAP_CENTER} cy={MAP_CENTER} r={MAP_RADIUS + 30} fill="none" stroke="var(--high)" vectorEffect="non-scaling-stroke" />
         {Array.from({ length: 72 }, (_, index) => {
           const angle = index * 5 * (Math.PI / 180);
           const major = index % 6 === 0;
@@ -83,6 +94,7 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
               y2={round(MAP_CENTER + outer * Math.cos(angle))}
               stroke={major ? "var(--muted)" : "var(--high)"}
               strokeWidth={major ? 1.2 : 1}
+              vectorEffect="non-scaling-stroke"
             />
           );
         })}
@@ -105,7 +117,7 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
           );
         })}
         <circle cx={MAP_CENTER} cy={MAP_CENTER} r={MAP_RADIUS + 22} fill="url(#readers-ice)" />
-        <circle cx={MAP_CENTER} cy={MAP_CENTER} r={MAP_RADIUS + 22} fill="none" stroke="var(--red)" strokeWidth="1.5" />
+        <circle cx={MAP_CENTER} cy={MAP_CENTER} r={MAP_RADIUS + 22} fill="none" stroke="var(--red)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
         <circle cx={MAP_CENTER} cy={MAP_CENTER} r={MAP_CLIP} fill="url(#readers-ocean)" />
         <image
           href="/earth-disk.webp"
@@ -116,9 +128,9 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
           clipPath="url(#readers-disc)"
           preserveAspectRatio="xMidYMid meet"
         />
-        <g fill="none" stroke="rgba(255,255,255,.28)" clipPath="url(#readers-disc)">
+        <g fill="none" stroke="rgba(255,255,255,.28)" clipPath="url(#readers-disc)" strokeWidth="1" vectorEffect="non-scaling-stroke">
           {[60, 30, 0, -30, -60].map((latitude) => (
-            <circle key={latitude} cx={MAP_CENTER} cy={MAP_CENTER} r={round((MAP_RADIUS * (90 - latitude)) / 180)} />
+            <circle key={latitude} cx={MAP_CENTER} cy={MAP_CENTER} r={round((MAP_RADIUS * (90 - latitude)) / 180)} vectorEffect="non-scaling-stroke" />
           ))}
           <circle
             cx={MAP_CENTER}
@@ -127,6 +139,7 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
             stroke="var(--red)"
             strokeDasharray="3 4"
             strokeOpacity="0.85"
+            vectorEffect="non-scaling-stroke"
           />
           {Array.from({ length: 12 }, (_, index) => {
             const angle = index * 30 * (Math.PI / 180);
@@ -137,6 +150,7 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
                 y1={MAP_CENTER}
                 x2={round(MAP_CENTER + MAP_CLIP * Math.sin(angle))}
                 y2={round(MAP_CENTER + MAP_CLIP * Math.cos(angle))}
+                vectorEffect="non-scaling-stroke"
               />
             );
           })}
@@ -155,7 +169,7 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
           const key = pointKey(point);
           const radius = pinRadius(point.count);
           const active = key === selected;
-          const hit = wideHit ? Math.max(52, radius + 28) : Math.max(22, radius + 12);
+          const hit = hitRadius(point.count, wideHit);
           return (
             <g
               key={key}
@@ -165,10 +179,10 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
               role="button"
               tabIndex={0}
               aria-pressed={active}
-              aria-label={`${point.city}, ${point.country} : ${point.count} ${point.count > 1 ? "visites" : "visite"}`}
+              aria-label={pointLabel(point)}
               onClick={(event) => {
                 event.stopPropagation();
-                setSelected(active ? null : key);
+                selectAt(event);
               }}
               onKeyDown={(event) => {
                 if (event.key !== "Enter" && event.key !== " ") return;
@@ -177,7 +191,7 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
               }}
             >
               {radius >= 8 ? <circle className="readers-pulse" r={radius} fill="var(--red)" /> : null}
-              <circle className="readers-pin" r={active ? radius + 2 : radius} />
+              <circle className={point.approximate ? "readers-pin is-approx" : "readers-pin"} r={active ? radius + 2 : radius} />
               <circle className="readers-focus" r={radius + 5} />
               <circle r={hit} fill="transparent" />
             </g>
@@ -190,18 +204,21 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
 }
 
 function VisitCard({ point, onClose }: { point: MapPoint; onClose: () => void }) {
-  const above = point.y > MAP_SIZE * 0.34;
-  const align = point.x < MAP_SIZE * 0.24 ? "start" : point.x > MAP_SIZE * 0.76 ? "end" : "center";
+  const left = (point.x / MAP_SIZE) * 100;
+  const top = (point.y / MAP_SIZE) * 100;
+  const above = top > 34;
+  const align = left < 24 ? "start" : left > 76 ? "end" : "center";
   const shiftX = align === "start" ? "0" : align === "end" ? "-100%" : "-50%";
   const shiftY = above ? "calc(-100% - 14px)" : "16px";
+  const countryOnly = point.approximate || !point.city;
   return (
     <div
       className={`readers-tip${above ? " is-above" : " is-below"} is-${align}`}
       role="dialog"
-      aria-label={`${point.city}, ${point.country}`}
+      aria-label={pointLabel(point)}
       style={{
-        left: `${(point.x / MAP_SIZE) * 100}%`,
-        top: `${(point.y / MAP_SIZE) * 100}%`,
+        left: `${left}%`,
+        top: `${top}%`,
         transform: `translate(${shiftX}, ${shiftY})`,
       }}
       onClick={(event) => event.stopPropagation()}
@@ -210,9 +227,9 @@ function VisitCard({ point, onClose }: { point: MapPoint; onClose: () => void })
         ×
       </button>
       <p className="t1">
-        {flagOf(point.code)} {point.city}
+        {flagOf(point.code)} {countryOnly ? point.country : point.city}
       </p>
-      <p className="t2">{point.country}</p>
+      {countryOnly ? null : <p className="t2">{point.country}</p>}
       <p className="t3">
         {point.count.toLocaleString("fr-FR")}
         <small>{point.count > 1 ? "visites" : "visite"}</small>
@@ -221,8 +238,38 @@ function VisitCard({ point, onClose }: { point: MapPoint; onClose: () => void })
   );
 }
 
+function pointLabel(point: MapPoint) {
+  const visits = visitLabel(point.count);
+  if (point.approximate || !point.city) return `${point.country} : ${visits}`;
+  return `${point.city}, ${point.country} : ${visits}`;
+}
+
+function visitLabel(count: number) {
+  return `${count.toLocaleString("fr-FR")} ${count > 1 ? "visites" : "visite"}`;
+}
+
 function pinRadius(count: number) {
   return Math.min(12, 3.2 + Math.sqrt(count) * 1.55);
+}
+
+function hitRadius(count: number, wide: boolean) {
+  const radius = pinRadius(count);
+  return wide ? Math.max(28, radius + 14) : Math.max(16, radius + 6);
+}
+
+function closestPoint(points: MapPoint[], x: number, y: number, limit: number) {
+  let best: MapPoint | null = null;
+  let bestDistance = limit * limit;
+  for (const point of points) {
+    const dx = point.x - x;
+    const dy = point.y - y;
+    const distance = dx * dx + dy * dy;
+    if (distance <= bestDistance) {
+      best = point;
+      bestDistance = distance;
+    }
+  }
+  return best;
 }
 
 function pointKey(point: MapPoint) {

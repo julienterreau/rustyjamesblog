@@ -1010,6 +1010,7 @@ a.fil-btn,a.btn-ghost{display:inline-flex;align-items:center;justify-content:cen
 .readers-hit:focus-visible .readers-focus{stroke:var(--paper);stroke-width:1.2}
 .readers-focus{fill:none;stroke:transparent}
 .readers-pin{fill:var(--red);stroke:var(--paper);stroke-width:1.6}
+.readers-pin.is-approx{stroke-dasharray:2.2 1.5}
 .readers-pulse{animation:readers-pulse 2.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes readers-pulse{0%{transform:scale(1);opacity:.65}100%{transform:scale(2.2);opacity:0}}
 .readers-tip{

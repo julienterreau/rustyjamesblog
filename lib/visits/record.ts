@@ -8,7 +8,6 @@ import {
   classifySource,
   cleanPath,
   clientIp,
-  cloudflareCountry,
   isBot,
   isPrefetch,
   readUtm,
@@ -33,7 +32,7 @@ export async function recordVisit(headers: Headers, body: Incoming) {
   const referrer = typeof body.referrer === "string" ? body.referrer.slice(0, 500) : "";
   const utm = readUtm(body.utm);
   const ip = clientIp(headers);
-  const place = await locate(ip, cloudflareCountry(headers));
+  const place = await locate(headers);
   const agent = classifyAgent(userAgent);
   const slug = articleSlugFromPath(path);
   const article = slug ? await findArticle(slug) : null;

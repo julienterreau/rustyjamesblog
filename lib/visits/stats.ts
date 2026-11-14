@@ -2,6 +2,7 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { articlePath } from "@/lib/articles";
 import { apiClient } from "@/sanity/lib/client";
+import { countryCentroid } from "@/lib/visits/country-centroids";
 import { projectCity } from "@/lib/visits/projection";
 import type {
   ArticleRank,
@@ -200,8 +201,12 @@ function chartHint(period: Period) {
 
 function mapPoints(rows: VisitRow[]): MapPoint[] {
   const groups = new Map<string, MapPoint>();
+  const unlocated = new Map<string, number>();
   for (const row of rows) {
-    if (typeof row.latitude !== "number" || typeof row.longitude !== "number") continue;
+    if (typeof row.latitude !== "number" || typeof row.longitude !== "number") {
+      if (row.country) unlocated.set(row.country, (unlocated.get(row.country) ?? 0) + 1);
+      continue;
+    }
     const projected = projectCity(row.longitude, row.latitude);
     if (!projected) continue;
     const city = row.city || "Ville inconnue";
@@ -219,6 +224,21 @@ function mapPoints(rows: VisitRow[]): MapPoint[] {
       count: 1,
       x: projected[0],
       y: projected[1],
+    });
+  }
+  for (const [code, count] of unlocated) {
+    const centroid = countryCentroid(code);
+    if (!centroid) continue;
+    const projected = projectCity(centroid[1], centroid[0]);
+    if (!projected) continue;
+    groups.set(`country|${code}`, {
+      city: "",
+      country: countryName(code),
+      code,
+      count,
+      x: projected[0],
+      y: projected[1],
+      approximate: true,
     });
   }
   return [...groups.values()].sort((a, b) => b.count - a.count);

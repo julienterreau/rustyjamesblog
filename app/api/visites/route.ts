@@ -1,8 +1,10 @@
+import { logVisitDiagnostics } from "@/lib/visits/geo";
 import { recordVisit } from "@/lib/visits/record";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
+    logVisitDiagnostics(request.headers);
     const body = (await request.json()) as { path?: unknown; referrer?: unknown; utm?: unknown };
     const id = await recordVisit(request.headers, body);
     if (!id) return new NextResponse(null, { status: 204 });

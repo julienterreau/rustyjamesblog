@@ -53,14 +53,34 @@ export function isPrefetch(headers: Headers) {
   return false;
 }
 
+/** Première adresse publique : Cloudflare, puis la chaîne transmise, puis X-Real-IP. */
 export function clientIp(headers: Headers) {
-  const cloudflare = headers.get("cf-connecting-ip")?.trim();
+  const cloudflare = publicAddress(headers.get("cf-connecting-ip"));
   if (cloudflare) return cloudflare;
-  const real = headers.get("x-real-ip")?.trim();
-  if (real) return real;
   const forwarded = headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0]?.trim() ?? "";
-  return "";
+  if (forwarded) {
+    for (const part of forwarded.split(",")) {
+      const address = publicAddress(part);
+      if (address) return address;
+    }
+  }
+  return publicAddress(headers.get("x-real-ip")) ?? "";
+}
+
+function publicAddress(value: string | null | undefined) {
+  const address = value?.trim() ?? "";
+  if (!address || isPrivateAddress(address)) return null;
+  return address;
+}
+
+function isPrivateAddress(address: string) {
+  const value = address.toLowerCase();
+  if (value === "::1" || value === "0.0.0.0" || value.startsWith("127.")) return true;
+  if (value.startsWith("10.") || value.startsWith("192.168.") || value.startsWith("169.254.")) return true;
+  if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(value)) return true;
+  if (value.startsWith("fc") || value.startsWith("fd") || value.startsWith("fe80:")) return true;
+  if (value.startsWith("::ffff:")) return isPrivateAddress(value.slice(7));
+  return false;
 }
 
 /** Pays annoncé par Cloudflare, s'il est un vrai code ISO. */

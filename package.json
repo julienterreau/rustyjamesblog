@@ -8,12 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "migrate:dry": "tsx --env-file=.env scripts/migrate-to-sanity.ts --dry-run",
-    "migrate": "tsx --env-file=.env scripts/migrate-to-sanity.ts",
-    "geoip:update": "node --env-file=.env scripts/update-geolite.mjs"
+    "migrate": "tsx --env-file=.env scripts/migrate-to-sanity.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
-    "@maxmind/geoip2-node": "^7.1.0",
     "@portabletext/react": "^8.0.1",
     "@sanity/image-url": "^2.1.1",
     "@sanity/locale-fr-fr": "^1.2.37",

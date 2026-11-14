@@ -42,6 +42,8 @@ export type MapPoint = {
   count: number;
   x: number;
   y: number;
+  /** Pays connu, ville absente : le point est le centre du pays. */
+  approximate?: boolean;
 };
 
 export type CountryRank = {
