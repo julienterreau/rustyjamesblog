@@ -85,6 +85,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
         />
+        <link rel="alternate" type="application/rss+xml" title="Rusty James News" href="/rss.xml" />
         <JsonLd data={siteGraph()} />
         <a className="skip" href="#une">
           Aller au contenu

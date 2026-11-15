@@ -1,4 +1,5 @@
 import { ArticlePortable } from "@/components/article-portable";
+import { ShareArticle } from "@/components/share-article";
 import { articlePath, formatDate, getArticle, resolveArchiveSlugs } from "@/lib/articles";
 import { JsonLd } from "@/components/json-ld";
 import {
@@ -82,6 +83,7 @@ async function ArticleView({ params }: { params: Promise<ArticleParams> }) {
       <div className="byline">
         <b>Par {article.author || "rusty james"}</b>
         {date ? <time dateTime={published}>{date}</time> : null}
+        <ShareArticle path={articlePath(article.slug)} title={article.title} />
       </div>
       {article.body?.length ? (
         <ArticlePortable body={article.body} title={article.title} />

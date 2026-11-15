@@ -54,6 +54,11 @@ export function GazetteHeader() {
           ))}
         </nav>
         <div className="head-actions">
+          <a className="icon-btn" href="/rss.xml" aria-label="Flux RSS">
+            <span className="ms" aria-hidden="true">
+              rss_feed
+            </span>
+          </a>
           <button
             className="icon-btn"
             type="button"
@@ -102,6 +107,9 @@ export function GazetteHeader() {
             {link.label}
           </Link>
         ))}
+        <a href="/rss.xml" onClick={() => setMenu(false)}>
+          Flux RSS
+        </a>
       </nav>
     </header>
   );

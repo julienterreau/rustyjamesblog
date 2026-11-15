@@ -4,6 +4,7 @@ import { articlePath, getGazette, type ArticleSummary } from "@/lib/articles";
 import { archivesHref } from "@/lib/archive-links";
 import { THEMES, themeById } from "@/lib/themes";
 import { GazetteSubscribe } from "@/components/gazette-subscribe";
+import { ShareArticle } from "@/components/share-article";
 import { ReaderMap } from "@/components/visits/reader-map";
 import { getVisitorStats } from "@/lib/visits/stats";
 import Link from "next/link";
@@ -293,9 +294,12 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
                   {plain(data.callout.excerpt).slice(0, 180) ||
                     "Étude documentée sur le donneur d’électrons mitochondrial et son rôle dans la réversion des états d’hypoxie tissulaire."}
                 </p>
-                <Link className="callout-more" href={articlePath(data.callout.slug)}>
-                  Consulter le dossier complet →
-                </Link>
+                <div className="callout-actions">
+                  <ShareArticle path={articlePath(data.callout.slug)} title={data.callout.title} />
+                  <Link className="callout-more" href={articlePath(data.callout.slug)}>
+                    Consulter le dossier complet →
+                  </Link>
+                </div>
               </div>
             ) : null}
           </aside>
@@ -421,6 +425,7 @@ function Foot({ article }: { article: ArticleSummary }) {
         <span className="ini" aria-hidden="true">RJ</span>
         rusty james
       </span>
+      <ShareArticle path={articlePath(article.slug)} title={article.title} />
       <Link className="rc-more" href={articlePath(article.slug)}>
         Consulter l’archive →
       </Link>

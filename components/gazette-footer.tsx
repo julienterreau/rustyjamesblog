@@ -65,6 +65,7 @@ export async function GazetteFooter() {
         <div className="wrap foot-bottom-in">
           <span>© 2009–2026 Rusty James News. Journalisme d&apos;investigation citoyen.</span>
           <span className="foot-links">
+            <a href="/rss.xml">Flux RSS</a>
             <a href="#top">Haut de page</a>
             <span className="foot-made">
               Made by{" "}

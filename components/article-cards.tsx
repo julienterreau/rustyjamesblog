@@ -1,5 +1,6 @@
 import { ArticleCover } from "@/components/article-cover";
 import { CoverImage } from "@/components/cover-image";
+import { ShareArticle } from "@/components/share-article";
 import { articlePath, formatDate, type ArticleSummary } from "@/lib/articles";
 import Link from "next/link";
 
@@ -18,39 +19,35 @@ export function ArticleLink({
 }) {
   const date = formatDate(article.published_at);
   return (
-    <Link
-      href={articlePath(article.slug)}
-      className={`group border-b border-[#2b2438] py-3 ${
-        stretch ? "flex min-h-0 flex-1 flex-col" : "block"
-      }`}
-    >
-      {image ? (
-        article.image ? (
-          <CoverImage
-            src={article.image}
-            alt=""
-            width={640}
-            height={360}
-            priority={priority}
-            className="aspect-[16/9] w-full bg-[#161616] object-cover"
-          />
-        ) : (
-          <ArticleCover title={article.title} tags={article.tags} slug={article.slug} />
-        )
-      ) : null}
-      <h3
-        className={`text-[15px] font-bold leading-snug underline-offset-2 transition-colors group-hover:underline ${
-          tone === "accent" ? "text-[#ff5262] group-hover:text-[#f5f0e9]" : "text-[#f5f0e9]"
-        }`}
-      >
-        {article.title}
-      </h3>
-      {date ? (
-        <time className={`block text-[12px] text-[#847a91] ${stretch ? "mt-auto" : ""}`}>
-          {date}
-        </time>
-      ) : null}
-    </Link>
+    <article className={stretch ? "archive-card is-stretch" : "archive-card"}>
+      <Link href={articlePath(article.slug)} className="archive-card-link group">
+        {image ? (
+          article.image ? (
+            <CoverImage
+              src={article.image}
+              alt=""
+              width={640}
+              height={360}
+              priority={priority}
+              className="aspect-[16/9] w-full bg-[#161616] object-cover"
+            />
+          ) : (
+            <ArticleCover title={article.title} tags={article.tags} slug={article.slug} />
+          )
+        ) : null}
+        <h3
+          className={`text-[15px] font-bold leading-snug underline-offset-2 transition-colors group-hover:underline ${
+            tone === "accent" ? "text-[#ff5262] group-hover:text-[#f5f0e9]" : "text-[#f5f0e9]"
+          }`}
+        >
+          {article.title}
+        </h3>
+      </Link>
+      <div className="archive-card-meta">
+        {date ? <time className="archive-card-date">{date}</time> : <span />}
+        <ShareArticle path={articlePath(article.slug)} title={article.title} />
+      </div>
+    </article>
   );
 }
 

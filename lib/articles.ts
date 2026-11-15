@@ -371,6 +371,18 @@ export async function listSitemapArticles() {
   }));
 }
 
+export async function listFeedArticles(limit = 30) {
+  const catalog = await loadCatalog();
+  return catalog.slice(0, limit).map((article) => ({
+    slug: article.slug,
+    title: article.title,
+    excerpt: article.excerpt,
+    published_at: article.published_at,
+    author: article.author,
+    tags: article.tags.slice(0, 4),
+  }));
+}
+
 export type GazetteMonth = {
   key: string;
   count: number;
