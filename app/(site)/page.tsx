@@ -4,6 +4,8 @@ import { articlePath, getGazette, type ArticleSummary } from "@/lib/articles";
 import { archivesHref } from "@/lib/archive-links";
 import { THEMES, themeById } from "@/lib/themes";
 import { GazetteSubscribe } from "@/components/gazette-subscribe";
+import { ReaderMap } from "@/components/visits/reader-map";
+import { getVisitorStats } from "@/lib/visits/stats";
 import Link from "next/link";
 import { preload } from "react-dom";
 import { Suspense } from "react";
@@ -396,20 +398,20 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
         </div>
       </section>
 
-      <section className="letter" aria-labelledby="letter-title">
-        <p className="letter-kicker">La lettre du jeudi</p>
-        <h2 className="letter-title" id="letter-title">
-          Une lecture pour voir
-          <em>au-delà du visible.</em>
-        </h2>
-        <p className="letter-desc">
-          Chaque semaine, une sélection exigeante et un texte inédit. Aucun bruit.
-          Seulement ce qui mérite votre attention.
-        </p>
-        <GazetteSubscribe letter />
+      <section className="home-map" aria-label="Carte des visiteurs">
+        <div className="home-map-in">
+          <Suspense fallback={<div className="readers-stage" />}>
+            <HomeReaders />
+          </Suspense>
+        </div>
       </section>
     </main>
   );
+}
+
+async function HomeReaders() {
+  const stats = await getVisitorStats("tout");
+  return <ReaderMap points={stats.points} lands={false} />;
 }
 
 function Foot({ article }: { article: ArticleSummary }) {

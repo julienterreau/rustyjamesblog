@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 const TICKS = ["0°", "90°E", "180°", "90°O"] as const;
 
-export function ReaderMap({ points }: { points: MapPoint[] }) {
+export function ReaderMap({ points, lands = true }: { points: MapPoint[]; lands?: boolean }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -53,7 +53,7 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
     };
   }, [selected]);
 
-  const lands = countryPoints(points);
+  const countries = countryPoints(points);
   const ordered = [...points].sort((a, b) => {
     const aOn = pointKey(a) === selected;
     const bOn = pointKey(b) === selected;
@@ -119,7 +119,6 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
           );
         })}
         <circle cx={MAP_CENTER} cy={MAP_CENTER} r={MAP_RADIUS + 22} fill="url(#readers-ice)" />
-        <circle cx={MAP_CENTER} cy={MAP_CENTER} r={MAP_RADIUS + 22} fill="none" stroke="var(--red)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
         <circle cx={MAP_CENTER} cy={MAP_CENTER} r={MAP_CLIP} fill="url(#readers-ocean)" />
         <image
           href="/earth-disk.webp"
@@ -134,15 +133,6 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
           {[60, 30, 0, -30, -60].map((latitude) => (
             <circle key={latitude} cx={MAP_CENTER} cy={MAP_CENTER} r={round((MAP_RADIUS * (90 - latitude)) / 180)} vectorEffect="non-scaling-stroke" />
           ))}
-          <circle
-            cx={MAP_CENTER}
-            cy={MAP_CENTER}
-            r={MAP_RADIUS / 2}
-            stroke="var(--red)"
-            strokeDasharray="3 4"
-            strokeOpacity="0.85"
-            vectorEffect="non-scaling-stroke"
-          />
           {Array.from({ length: 12 }, (_, index) => {
             const angle = index * 30 * (Math.PI / 180);
             return (
@@ -192,9 +182,9 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
                 setSelected(active ? null : key);
               }}
             >
-              {radius >= 8 ? <circle className="readers-pulse" r={radius} fill="var(--red)" /> : null}
-              <circle className={point.approximate ? "readers-pin is-approx" : "readers-pin"} r={active ? radius + 2 : radius} />
-              <circle className={active ? "readers-focus is-on" : "readers-focus"} r={radius + 6} />
+              {point.recent ? <circle className="readers-pulse" r={radius} fill="var(--red)" /> : null}
+              <circle className={point.recent ? "readers-pin is-live" : "readers-pin"} r={active ? radius + 0.6 : radius} />
+              <circle className={active ? "readers-focus is-on" : "readers-focus"} r={radius + 2.4} />
               <circle r={hit} fill="transparent" />
             </g>
           );
@@ -202,9 +192,9 @@ export function ReaderMap({ points }: { points: MapPoint[] }) {
       </svg>
       {open ? <VisitCard point={open} onClose={() => setSelected(null)} /> : null}
     </div>
-    {lands.length > 0 ? (
+    {lands && countries.length > 0 ? (
       <ul className="readers-lands">
-        {lands.map((point) => {
+        {countries.map((point) => {
           const key = pointKey(point);
           const active = key === selected;
           return (
@@ -277,7 +267,7 @@ function visitLabel(count: number) {
 }
 
 function pinRadius(count: number) {
-  return Math.min(12, 3.2 + Math.sqrt(count) * 1.55);
+  return Math.min(12, 2 + Math.sqrt(count) * 0.1);
 }
 
 function hitRadius(count: number, wide: boolean) {

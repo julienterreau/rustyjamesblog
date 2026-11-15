@@ -28,6 +28,8 @@ export default function VisitorsPage() {
   );
 }
 
+const ARCHIVE_VISITS = 45_635_000;
+
 async function ReaderBoard() {
   const stats = await getVisitorStats("tout");
   const countries = stats.countries.length;
@@ -36,14 +38,23 @@ async function ReaderBoard() {
     <>
       <ReaderMap points={stats.points} />
       <div className="readers-foot">
-        <aside className="readers-count">
-          <p className="readers-label">Visites</p>
-          <p className="readers-total">{stats.visits.toLocaleString("fr-FR")}</p>
-          <p className="readers-where">{unit(countries, "pays", "pays")}</p>
-        </aside>
-        <p className="readers-hint">
-          {stats.visits === 0 ? "Aucune visite pour l'instant." : stats.points.length > 0 ? "Cliquez sur un point" : "Aucun pays localisé pour l'instant."}
-        </p>
+        <div className="readers-counts">
+          <aside className="readers-count">
+            <p className="readers-label">Visiteurs</p>
+            <p className="readers-total">{ARCHIVE_VISITS.toLocaleString("fr-FR")}</p>
+            <p className="readers-where">Depuis 2009</p>
+          </aside>
+          <aside className="readers-count">
+            <p className="readers-label">Visiteurs</p>
+            <p className="readers-total">{stats.visits.toLocaleString("fr-FR")}</p>
+            <p className="readers-where">En direct · {unit(countries, "pays", "pays")}</p>
+          </aside>
+        </div>
+        <div className="readers-aside">
+          <p className="readers-hint">
+            {stats.visits === 0 ? "Aucune visite pour l'instant." : stats.points.length > 0 ? "Cliquez sur un point" : "Aucun pays localisé pour l'instant."}
+          </p>
+        </div>
       </div>
     </>
   );

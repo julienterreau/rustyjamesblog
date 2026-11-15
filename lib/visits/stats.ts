@@ -134,7 +134,7 @@ function assemble(rows: VisitRow[], period: Period, now: Date, partial: boolean)
     partial,
     visits,
     kpis,
-    points: mapPoints(current),
+    points: mapPoints(current, now),
     countries,
     unknown,
     unknownShare: visits === 0 ? "0" : formatPercent(unknown / visits),
@@ -199,12 +199,22 @@ function chartHint(period: Period) {
   return "Depuis le lancement";
 }
 
-function mapPoints(rows: VisitRow[]): MapPoint[] {
+function mapPoints(rows: VisitRow[], now: Date): MapPoint[] {
+  const recentAfter = now.getTime() - 86_400_000;
+  const isRecent = (row: VisitRow) => {
+    const time = Date.parse(row.occurredAt);
+    return Number.isFinite(time) && time >= recentAfter;
+  };
   const groups = new Map<string, MapPoint>();
-  const unlocated = new Map<string, number>();
+  const unlocated = new Map<string, { count: number; recent: boolean }>();
   for (const row of rows) {
     if (typeof row.latitude !== "number" || typeof row.longitude !== "number") {
-      if (row.country) unlocated.set(row.country, (unlocated.get(row.country) ?? 0) + 1);
+      if (row.country) {
+        const bucket = unlocated.get(row.country) ?? { count: 0, recent: false };
+        bucket.count += 1;
+        if (isRecent(row)) bucket.recent = true;
+        unlocated.set(row.country, bucket);
+      }
       continue;
     }
     const projected = projectCity(row.longitude, row.latitude);
@@ -215,6 +225,7 @@ function mapPoints(rows: VisitRow[]): MapPoint[] {
     const existing = groups.get(key);
     if (existing) {
       existing.count += 1;
+      if (isRecent(row)) existing.recent = true;
       continue;
     }
     groups.set(key, {
@@ -224,9 +235,10 @@ function mapPoints(rows: VisitRow[]): MapPoint[] {
       count: 1,
       x: projected[0],
       y: projected[1],
+      recent: isRecent(row),
     });
   }
-  for (const [code, count] of unlocated) {
+  for (const [code, bucket] of unlocated) {
     const centroid = countryCentroid(code);
     if (!centroid) continue;
     const projected = projectCity(centroid[1], centroid[0]);
@@ -235,10 +247,11 @@ function mapPoints(rows: VisitRow[]): MapPoint[] {
       city: "",
       country: countryName(code),
       code,
-      count,
+      count: bucket.count,
       x: projected[0],
       y: projected[1],
       approximate: true,
+      recent: bucket.recent,
     });
   }
   return [...groups.values()].sort((a, b) => b.count - a.count);

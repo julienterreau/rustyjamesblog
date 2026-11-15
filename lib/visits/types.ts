@@ -44,6 +44,8 @@ export type MapPoint = {
   y: number;
   /** Pays connu, ville absente : le point est le centre du pays. */
   approximate?: boolean;
+  /** Au moins une visite dans les dernières 24 heures. */
+  recent?: boolean;
 };
 
 export type CountryRank = {

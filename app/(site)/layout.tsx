@@ -22,10 +22,20 @@ const montserrat = Montserrat({
 const display = EB_Garamond({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
-  style: ["normal", "italic"],
+  style: "normal",
   variable: "--font-garamond",
   display: "swap",
   adjustFontFallback: true,
+  preload: false,
+});
+
+const displayItalic = EB_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  style: "italic",
+  variable: "--font-garamond-italic",
+  display: "swap",
+  adjustFontFallback: false,
   preload: false,
 });
 
@@ -69,7 +79,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${montserrat.variable} ${display.variable}`}>
+    <html lang="fr" className={`${montserrat.variable} ${display.variable} ${displayItalic.variable}`}>
       <body id="top">
         <link
           rel="stylesheet"
