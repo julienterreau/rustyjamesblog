@@ -1044,6 +1044,10 @@ a.fil-btn,a.btn-ghost{display:inline-flex;align-items:center;justify-content:cen
 .readers-lede{max-width:36rem;color:var(--muted);line-height:1.6}
 .readers-stage{position:relative;width:100%;margin-top:1.25rem}
 .readers-stage:empty{aspect-ratio:1}
+@media (min-width:768px){
+  .readers-stage,
+  .home-map .readers-stage{width:70%;margin-left:auto;margin-right:auto}
+}
 .readers-svg{display:block;width:100%;height:auto}
 .readers-svg text{font-family:var(--sans)}
 .readers-hit{cursor:pointer}
