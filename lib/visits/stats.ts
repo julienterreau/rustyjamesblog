@@ -34,6 +34,18 @@ const ROW = `{
 
 type Range = { from: Date; to: Date; previousFrom: Date | null };
 
+/** Visites déjà comptées avant ce site, auxquelles s'ajoutent les visites enregistrées. */
+const ARCHIVE_BASELINE = 45_635_000;
+
+export async function getArchiveVisits() {
+  "use cache";
+  cacheLife({ stale: 60, revalidate: 60, expire: 600 });
+  cacheTag("visits");
+  const recorded = await apiClient.fetch<number>(`count(*[_type == "visit" && seeded != true])`);
+  const extra = typeof recorded === "number" && Number.isFinite(recorded) ? Math.max(0, Math.floor(recorded)) : 0;
+  return ARCHIVE_BASELINE + extra;
+}
+
 export async function getVisitorStats(period: Period): Promise<VisitorStats> {
   "use cache";
   cacheLife({ stale: 60, revalidate: 60, expire: 600 });

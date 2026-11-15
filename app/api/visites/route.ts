@@ -1,5 +1,6 @@
 import { logVisitDiagnostics } from "@/lib/visits/geo";
 import { recordVisit } from "@/lib/visits/record";
+import { revalidateTag } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -8,6 +9,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as { path?: unknown; referrer?: unknown; utm?: unknown };
     const id = await recordVisit(request.headers, body);
     if (!id) return new NextResponse(null, { status: 204 });
+    revalidateTag("visits", { expire: 0 });
     return NextResponse.json({ id }, { status: 201 });
   } catch {
     console.error("Visite non enregistrée.");

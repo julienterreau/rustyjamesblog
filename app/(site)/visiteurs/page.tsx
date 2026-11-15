@@ -1,5 +1,5 @@
 import { ReaderMap } from "@/components/visits/reader-map";
-import { getVisitorStats } from "@/lib/visits/stats";
+import { getArchiveVisits, getVisitorStats } from "@/lib/visits/stats";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -28,10 +28,8 @@ export default function VisitorsPage() {
   );
 }
 
-const ARCHIVE_VISITS = 45_635_000;
-
 async function ReaderBoard() {
-  const stats = await getVisitorStats("tout");
+  const [stats, archive] = await Promise.all([getVisitorStats("tout"), getArchiveVisits()]);
   const countries = stats.countries.length;
 
   return (
@@ -41,7 +39,7 @@ async function ReaderBoard() {
         <div className="readers-counts">
           <aside className="readers-count">
             <p className="readers-label">Visiteurs</p>
-            <p className="readers-total">{ARCHIVE_VISITS.toLocaleString("fr-FR")}</p>
+            <p className="readers-total">{archive.toLocaleString("fr-FR")}</p>
             <p className="readers-where">Depuis 2009</p>
           </aside>
           <aside className="readers-count">
