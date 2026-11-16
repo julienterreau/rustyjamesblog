@@ -137,7 +137,7 @@ export function ArchiveDateFilter({
   }
 
   return (
-    <div ref={root} className="period">
+    <div ref={root} className="period notranslate" translate="no">
       <button
         type="button"
         className={`period-trigger${open || activeLabel ? " is-open" : ""}`}

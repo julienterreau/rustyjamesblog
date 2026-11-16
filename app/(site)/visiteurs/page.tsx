@@ -35,7 +35,7 @@ async function ReaderBoard() {
   return (
     <>
       <ReaderMap points={stats.points} />
-      <div className="readers-foot">
+      <div className="readers-foot notranslate" translate="no">
         <div className="readers-counts">
           <aside className="readers-count">
             <p className="readers-label">Visiteurs</p>

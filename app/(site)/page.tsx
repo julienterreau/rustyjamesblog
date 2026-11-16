@@ -131,11 +131,11 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
           <p className="feat-quote">{QUOTE}</p>
           <div className="feat-meta">
             <span className="meta-chip">
-              <span className="ms" aria-hidden="true">verified_user</span>
+              <span className="ms notranslate" translate="no" aria-hidden="true">verified_user</span>
               Indexation intégrale 2009–2026
             </span>
             <span className="meta-chip">
-              <span className="ms" aria-hidden="true">token</span>
+              <span className="ms notranslate" translate="no" aria-hidden="true">token</span>
               {count.format(data.total)} publications recensées · {count.format(data.total)} réimportées
             </span>
           </div>
@@ -146,7 +146,7 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
         <div className="ticker-in">
           <div className="ticker-left">
             <span className="ticker-label">
-              <span className="ms" aria-hidden="true">emergency</span>
+              <span className="ms notranslate" translate="no" aria-hidden="true">emergency</span>
               Flash Découverte :
             </span>
             <Link className="ticker-text" href={lead ? articlePath(lead.slug) : "/#une"}>
@@ -186,7 +186,7 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
         </div>
 
         <div className="broadsheet">
-          <div className="col-main">
+          <div className={q ? "col-main notranslate" : "col-main"} translate={q ? "no" : undefined}>
             {lead ? <Lead article={lead} /> : null}
             {rubrique || q || annee ? (
               <div className="chips">
@@ -245,7 +245,7 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
             <div className="side-box">
               <div className="side-box-h">
                 <span className="rubric-with-ico">
-                  <span className="ms" aria-hidden="true">history_edu</span>
+                  <span className="ms notranslate" translate="no" aria-hidden="true">history_edu</span>
                   Dossiers à lire
                 </span>
                 <span className="side-note-r">Textes intégraux</span>
@@ -263,7 +263,7 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
               </ol>
             </div>
 
-            <form className="side-search" action="/#une" method="get">
+            <form className="side-search notranslate" action="/#une" method="get" translate="no">
               {rubrique ? <input type="hidden" name="rubrique" value={rubrique} /> : null}
               {annee ? <input type="hidden" name="annee" value={annee} /> : null}
               <label className="sr-only" htmlFor="q-side">
@@ -274,7 +274,7 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
 
             <div className="news-box">
               <div className="news-h">
-                <span className="ms" aria-hidden="true">mark_email_unread</span>
+                <span className="ms notranslate" translate="no" aria-hidden="true">mark_email_unread</span>
                 <span className="rubric">Dépêche Directe</span>
               </div>
               <h3 className="news-title">Abonnez-vous à la Lettre Confidentielle de Rusty James</h3>
@@ -317,7 +317,7 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
               </p>
             </div>
             <div className="biblio-badge">
-              <span className="ms" aria-hidden="true">storage</span>
+              <span className="ms notranslate" translate="no" aria-hidden="true">storage</span>
               Pic d&apos;activité : {peakLabel}
             </div>
           </div>
@@ -387,7 +387,7 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
             return (
               <Link key={themeItem.id} className="hub" href={`/?rubrique=${themeItem.id}#une`}>
                 <span className="hub-top">
-                  <span className="ms hub-ico" aria-hidden="true">{themeItem.ico}</span>
+                  <span className="ms hub-ico notranslate" translate="no" aria-hidden="true">{themeItem.ico}</span>
                   <span className="hub-code">CODE: {themeItem.code}</span>
                 </span>
                 <h3 className="hub-title">{themeItem.name}</h3>
@@ -421,10 +421,6 @@ async function HomeReaders() {
 function Foot({ article }: { article: ArticleSummary }) {
   return (
     <div className="rc-foot">
-      <span className="rc-author">
-        <span className="ini" aria-hidden="true">RJ</span>
-        rusty james
-      </span>
       <ShareArticle path={articlePath(article.slug)} title={article.title} />
       <Link className="rc-more" href={articlePath(article.slug)}>
         Consulter l’archive →

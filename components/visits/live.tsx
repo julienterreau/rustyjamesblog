@@ -45,9 +45,9 @@ export function OnlineNow() {
   const { online } = useContext(LiveContext);
   const label = online > 1 ? `${online} lecteurs en ce moment` : online === 1 ? "1 lecteur en ce moment" : "Aucun lecteur en ce moment";
   return (
-    <p className="obs-live" aria-live="polite">
+    <p className="obs-live notranslate" aria-live="polite" translate="no">
       <span className="obs-dot" aria-hidden="true" />
-      {label}
+      <span>{label}</span>
     </p>
   );
 }
@@ -62,11 +62,15 @@ export function LiveFeed() {
   }, []);
 
   if (!visits.length) {
-    return <p className="obs-quiet">En attente du premier lecteur.</p>;
+    return (
+      <p className="obs-quiet notranslate" translate="no">
+        En attente du premier lecteur.
+      </p>
+    );
   }
 
   return (
-    <ul className="obs-feed">
+    <ul className="obs-feed notranslate" translate="no">
       {visits.map((visit) => (
         <li key={visit.id}>
           <span className="when">{relative(visit.at)}</span>

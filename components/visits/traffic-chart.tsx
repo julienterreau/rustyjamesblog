@@ -28,7 +28,7 @@ export function TrafficChart({ series }: { series: ChartBar[] }) {
   const step = Math.max(1, Math.ceil(series.length / 8));
 
   return (
-    <div ref={ref}>
+    <div ref={ref} className="notranslate" translate="no">
       <svg className="obs-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Fréquentation">
         {ticks.map((tick) => {
           const y = margin.top + innerHeight - (tick / ceiling) * innerHeight;

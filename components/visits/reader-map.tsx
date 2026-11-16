@@ -62,7 +62,7 @@ export function ReaderMap({ points, lands = true }: { points: MapPoint[]; lands?
   });
 
   return (
-    <div ref={stageRef}>
+    <div ref={stageRef} className="notranslate" translate="no">
     <div className="readers-stage">
       <svg ref={svgRef} className="readers-svg" viewBox={`0 0 ${MAP_SIZE} ${MAP_SIZE}`} onClick={selectAt}>
         <title>Terre plate, pôle Nord au centre</title>

@@ -1,5 +1,6 @@
 "use client";
 
+import { GTranslate } from "@/components/gtranslate";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -20,9 +21,10 @@ export function GazetteHeader() {
 
   return (
     <header className="site-head">
+      <GTranslate />
       <div className="head-in">
         <div className="head-brand">
-          <Link className="brand" href="/">
+          <Link className="brand notranslate" href="/" translate="no">
             <span className="brand-name">Rusty James</span>
             <span className="brand-sub">News</span>
           </Link>
@@ -55,7 +57,7 @@ export function GazetteHeader() {
         </nav>
         <div className="head-actions">
           <a className="icon-btn" href="/rss.xml" aria-label="Flux RSS">
-            <span className="ms" aria-hidden="true">
+            <span className="ms notranslate" translate="no" aria-hidden="true">
               rss_feed
             </span>
           </a>
@@ -67,7 +69,7 @@ export function GazetteHeader() {
             aria-label="Rechercher dans les archives"
             onClick={() => setSearch((value) => !value)}
           >
-            <span className="ms" aria-hidden="true">
+            <span className="ms notranslate" translate="no" aria-hidden="true">
               search
             </span>
           </button>
@@ -79,7 +81,7 @@ export function GazetteHeader() {
             aria-label={menu ? "Fermer le menu" : "Ouvrir le menu"}
             onClick={() => setMenu((value) => !value)}
           >
-            <span className="ms" aria-hidden="true">
+            <span className="ms notranslate" translate="no" aria-hidden="true">
               {menu ? "close" : "menu"}
             </span>
           </button>
@@ -87,8 +89,8 @@ export function GazetteHeader() {
         </div>
       </div>
       <div className="search-panel" id="search-panel" hidden={!search}>
-        <form className="search-in" action="/" method="get">
-          <span className="ms search-ico" aria-hidden="true">
+        <form className="search-in notranslate" action="/" method="get" translate="no">
+          <span className="ms search-ico notranslate" translate="no" aria-hidden="true">
             search
           </span>
           <input
