@@ -17,8 +17,8 @@ export function VisitTracker() {
 
     const flush = () => {
       if (sent || !visitId) return;
-      const seconds = Math.round((performance.now() - started) / 1000);
-      if (seconds < 1) return;
+      // Toujours au moins 1 s : la durée marque aussi le départ du lecteur pour le compteur en direct.
+      const seconds = Math.max(1, Math.round((performance.now() - started) / 1000));
       sent = true;
       const body = JSON.stringify({ id: visitId, seconds });
       if (typeof navigator.sendBeacon === "function") {

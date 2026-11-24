@@ -1,9 +1,21 @@
 "use client";
 
-import type { LiveSnapshot } from "@/lib/visits/types";
+import { ReaderMap } from "@/components/visits/reader-map";
+import type { LiveSnapshot, MapPoint } from "@/lib/visits/types";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-const LiveContext = createContext<LiveSnapshot>({ online: 0, visits: [] });
+const EMPTY: LiveSnapshot = { online: 0, countries: 0, points: [], visits: [] };
+const LiveContext = createContext<LiveSnapshot>(EMPTY);
+
+function asLive(payload: Partial<LiveSnapshot> | null): LiveSnapshot | null {
+  if (!payload || !Array.isArray(payload.visits)) return null;
+  return {
+    online: typeof payload.online === "number" ? payload.online : 0,
+    countries: typeof payload.countries === "number" ? payload.countries : 0,
+    points: Array.isArray(payload.points) ? (payload.points as MapPoint[]) : [],
+    visits: payload.visits,
+  };
+}
 
 export function LiveProvider({
   initial,
@@ -26,8 +38,9 @@ export function LiveProvider({
     const tick = () => {
       void fetch("/api/visites/direct")
         .then((response) => (response.ok ? response.json() : null))
-        .then((payload: LiveSnapshot | null) => {
-          if (!stopped && payload && Array.isArray(payload.visits)) setData(payload);
+        .then((payload: Partial<LiveSnapshot> | null) => {
+          const next = asLive(payload);
+          if (!stopped && next) setData(next);
         })
         .catch(() => undefined);
     };
@@ -50,6 +63,40 @@ export function OnlineNow() {
       <span>{label}</span>
     </p>
   );
+}
+
+export function LiveReadersCount() {
+  const { online, countries } = useContext(LiveContext);
+  const where =
+    online === 0
+      ? "En direct"
+      : countries > 0
+        ? `En direct · ${countries.toLocaleString("fr-FR")} pays`
+        : "En direct · pays non localisés";
+
+  return (
+    <aside className="readers-count" aria-live="polite">
+      <p className="readers-label">Visiteurs</p>
+      <p className="readers-total">{online.toLocaleString("fr-FR")}</p>
+      <p className="readers-where">{where}</p>
+    </aside>
+  );
+}
+
+export function LiveReaderMap({ lands = true }: { lands?: boolean }) {
+  const { points } = useContext(LiveContext);
+  return <ReaderMap points={points} lands={lands} />;
+}
+
+export function LiveReadersHint() {
+  const { online, points } = useContext(LiveContext);
+  const hint =
+    points.length > 0
+      ? "Cliquez sur un point"
+      : online > 0
+        ? "Des lecteurs sont en ligne, mais leur pays n’est pas encore connu."
+        : "Aucun lecteur localisé en ce moment.";
+  return <p className="readers-hint">{hint}</p>;
 }
 
 export function LiveFeed() {

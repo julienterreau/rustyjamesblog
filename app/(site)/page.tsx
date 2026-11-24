@@ -5,8 +5,8 @@ import { archivesHref } from "@/lib/archive-links";
 import { THEMES, themeById } from "@/lib/themes";
 import { GazetteSubscribe } from "@/components/gazette-subscribe";
 import { ShareArticle } from "@/components/share-article";
-import { ReaderMap } from "@/components/visits/reader-map";
-import { getVisitorStats } from "@/lib/visits/stats";
+import { LiveProvider, LiveReaderMap } from "@/components/visits/live";
+import { getLiveSnapshot } from "@/lib/visits/stats";
 import Link from "next/link";
 import { preload } from "react-dom";
 import { Suspense } from "react";
@@ -414,8 +414,12 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
 }
 
 async function HomeReaders() {
-  const stats = await getVisitorStats("tout");
-  return <ReaderMap points={stats.points} lands={false} />;
+  const live = await getLiveSnapshot();
+  return (
+    <LiveProvider initial={live} preview={false}>
+      <LiveReaderMap lands={false} />
+    </LiveProvider>
+  );
 }
 
 function Foot({ article }: { article: ArticleSummary }) {
