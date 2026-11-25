@@ -1,4 +1,5 @@
 import { articlePath, type Article } from "@/lib/articles";
+import { isLoneMediaPaste, mediaEmbedSrc } from "@/lib/embeds";
 import { isSanityImage, sanityImageUrl } from "@/sanity/lib/image";
 import { absoluteUrl, getSiteUrl, site } from "@/lib/site";
 import type { Metadata } from "next";
@@ -263,6 +264,7 @@ export function optimizeArticleHtml(html: string) {
   html = unwrapAdsByGoogle(html);
   html = stripStyleAttributes(html);
   html = html.replace(/<img\b[^>]*\/filters:no_upscale\(\)\/https?%3A[^>]*>/gi, "");
+  html = rewriteMediaEmbeds(html);
   let seen = false;
   return html.replace(/<img\b([^>]*?)\/?>/gi, (_match, raw: string) => {
     let attrs = String(raw).trim();
@@ -287,6 +289,26 @@ export function optimizeArticleHtml(html: string) {
       has("alt") ? "" : 'alt=""',
     ].filter(Boolean);
     return `<img ${attrs}${extra.length ? ` ${extra.join(" ")}` : ""}>`;
+  });
+}
+
+function rewriteMediaEmbeds(html: string) {
+  html = html.replace(/<iframe\b([^>]*)>/gi, (match, raw: string) => {
+    const attrs = String(raw);
+    const srcMatch = attrs.match(/\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i);
+    const src = srcMatch?.[1] || srcMatch?.[2] || srcMatch?.[3];
+    if (!src || !srcMatch) return match;
+    const embed = mediaEmbedSrc(src);
+    if (!embed || embed === src) return match;
+    return `<iframe${attrs.replace(srcMatch[0], `src="${embed}"`)}>`;
+  });
+
+  return html.replace(/<p>([\s\S]*?)<\/p>/gi, (match, inner: string) => {
+    const text = stripText(String(inner));
+    if (!isLoneMediaPaste(text)) return match;
+    const src = mediaEmbedSrc(text);
+    if (!src) return match;
+    return `<iframe src="${src}" title="Vidéo intégrée" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
   });
 }
 

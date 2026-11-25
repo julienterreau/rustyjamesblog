@@ -1,4 +1,5 @@
 import { articlePath, resolveArchiveSlugs } from "@/lib/articles";
+import { isLoneMediaPaste, mediaEmbedSrc } from "@/lib/embeds";
 import { articleHrefPath, internalLinkPaths, sameTitle } from "@/lib/seo";
 import { SanityImage } from "@/components/sanity-image";
 import { sanityImageSource } from "@/sanity/lib/image";
@@ -23,10 +24,30 @@ function withoutDuplicateTitle(blocks: PortableTextBlock[], title: string) {
   return blocks.slice(1);
 }
 
+function EmbedFrame({ src, title }: { src: string; title?: string }) {
+  return (
+    <iframe
+      src={src}
+      title={title || "Vidéo intégrée"}
+      loading="lazy"
+      referrerPolicy="strict-origin-when-cross-origin"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowFullScreen
+    />
+  );
+}
+
 function components(resolved: Record<string, string>): PortableTextComponents {
   return {
     block: {
-      normal: ({ children }) => <p>{children}</p>,
+      normal: ({ children, value }) => {
+        const text = toPlainText(value).trim();
+        if (isLoneMediaPaste(text)) {
+          const src = mediaEmbedSrc(text);
+          if (src) return <EmbedFrame src={src} />;
+        }
+        return <p>{children}</p>;
+      },
       h2: ({ children }) => <h2>{children}</h2>,
       h3: ({ children }) => <h3>{children}</h3>,
       h4: ({ children }) => <h4>{children}</h4>,
@@ -78,18 +99,11 @@ function components(resolved: Record<string, string>): PortableTextComponents {
         );
       },
       embed: ({ value }) => {
-        const url = typeof value?.url === "string" ? value.url : "";
-        if (!/^https?:\/\//i.test(url)) return null;
-        const title = typeof value?.title === "string" && value.title ? value.title : "Média intégré";
-        return (
-          <iframe
-            src={url}
-            title={title}
-            loading="lazy"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-          />
-        );
+        const raw = typeof value?.url === "string" ? value.url : "";
+        const src = mediaEmbedSrc(raw);
+        if (!src) return null;
+        const title = typeof value?.title === "string" && value.title ? value.title : "Vidéo intégrée";
+        return <EmbedFrame src={src} title={title} />;
       },
     },
   };

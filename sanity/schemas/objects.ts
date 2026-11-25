@@ -1,27 +1,42 @@
+import { mediaEmbedSrc } from "@/lib/embeds";
 import { defineArrayMember, defineField, defineType } from "sanity";
 
 export const embed = defineType({
   name: "embed",
-  title: "Média intégré",
+  title: "Vidéo YouTube",
   type: "object",
   fields: [
     defineField({
       name: "url",
-      title: "Adresse",
-      type: "url",
-      description: "YouTube ou une autre adresse à afficher dans une iframe.",
-      validation: (rule) => rule.required().uri({ scheme: ["http", "https"] }),
+      title: "Adresse ou code HTML",
+      type: "text",
+      rows: 4,
+      description:
+        "Collez une adresse YouTube (watch, youtu.be, Shorts) ou le code iframe « Intégrer » de YouTube.",
+      validation: (rule) =>
+        rule.required().custom((value) => {
+          if (typeof value !== "string" || !value.trim()) return "Indiquez une adresse ou un code iframe.";
+          if (!mediaEmbedSrc(value)) {
+            return "Adresse ou code YouTube non reconnu. Exemple : https://www.youtube.com/watch?v=…";
+          }
+          return true;
+        }),
     }),
     defineField({
       name: "title",
       title: "Titre",
       type: "string",
+      description: "Optionnel, pour l’accessibilité.",
     }),
   ],
   preview: {
     select: { title: "title", subtitle: "url" },
     prepare({ title, subtitle }) {
-      return { title: title || "Média intégré", subtitle };
+      const src = typeof subtitle === "string" ? mediaEmbedSrc(subtitle) : null;
+      return {
+        title: title || "Vidéo YouTube",
+        subtitle: src || (typeof subtitle === "string" ? subtitle.slice(0, 80) : undefined),
+      };
     },
   },
 });
