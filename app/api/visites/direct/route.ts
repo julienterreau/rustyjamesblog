@@ -8,6 +8,6 @@ export async function GET() {
     const live = await getLiveSnapshot();
     return NextResponse.json(live, { headers: { "cache-control": "no-store" } });
   } catch {
-    return NextResponse.json({ online: 0, countries: 0, points: [], visits: [] }, { headers: { "cache-control": "no-store" } });
+    return NextResponse.json({ online: 0, visits: [] }, { headers: { "cache-control": "no-store" } });
   }
 }

@@ -1,6 +1,5 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
-import { connection } from "next/server";
 import { articlePath } from "@/lib/articles";
 import { apiClient } from "@/sanity/lib/client";
 import { countryCentroid } from "@/lib/visits/country-centroids";
@@ -21,8 +20,6 @@ import type {
 } from "@/lib/visits/types";
 
 const LIMIT = 12000;
-/** Une page restée ouverte plus longtemps sans signe de départ n'est plus comptée en direct. */
-const LIVE_WINDOW_MS = 30 * 60 * 1000;
 const SOURCE_HINT: Record<string, string> = {
   Facebook: "Réseau social",
   Google: "Recherche",
@@ -65,7 +62,6 @@ export async function getVisitorStats(period: Period): Promise<VisitorStats> {
 }
 
 export async function getLiveSnapshot(): Promise<LiveSnapshot> {
-  await connection();
   return queryLive();
 }
 
@@ -87,26 +83,19 @@ async function fetchRows(from: Date, to: Date) {
 }
 
 async function queryLive(): Promise<LiveSnapshot> {
-  const now = new Date();
-  const since = new Date(now.getTime() - LIVE_WINDOW_MS).toISOString();
-  const rows = await apiClient.fetch<Array<VisitRow & { _id?: string }>>(
-    `*[_type == "visit" && seeded != true && occurredAt >= $since] | order(occurredAt desc)[0...${LIMIT}]{
-      _id, occurredAt, path, country, city, latitude, longitude, device, client, source,
-      visitorId, durationSec, articleTitle, articleCategory, articleSlug
-    }`,
-    { since },
-  );
-  const recent = Array.isArray(rows) ? rows : [];
-  // La durée n'est écrite qu'au départ du lecteur (onglet masqué ou page quittée) :
-  // une page encore sans durée est une page encore ouverte.
-  const live = recent.filter((row) => row.durationSec == null);
-  const online = new Set(live.map((row) => row.visitorId).filter(Boolean)).size;
-  const countries = new Set(live.map((row) => row.country).filter((code): code is string => Boolean(code))).size;
+  const since = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const [online, rows] = await Promise.all([
+    apiClient.fetch<number>(`count(array::unique(*[_type == "visit" && occurredAt >= $since].visitorId))`, { since }),
+    apiClient.fetch<Array<VisitRow & { _id?: string }>>(
+      `*[_type == "visit"] | order(occurredAt desc)[0...10]{
+        _id, occurredAt, path, country, city, latitude, longitude, device, client, source,
+        visitorId, durationSec, articleTitle, articleCategory, articleSlug
+      }`,
+    ),
+  ]);
   return {
-    online,
-    countries,
-    points: mapPoints(live, now).map((point) => ({ ...point, recent: true })),
-    visits: recent.slice(0, 10).map((row, index) => toLive(row, row._id || `live-${index}`)),
+    online: typeof online === "number" ? online : 0,
+    visits: (Array.isArray(rows) ? rows : []).map((row, index) => toLive(row, row._id || `live-${index}`)),
   };
 }
 

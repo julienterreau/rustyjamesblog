@@ -95,8 +95,6 @@ export type LiveVisit = {
 
 export type LiveSnapshot = {
   online: number;
-  countries: number;
-  points: MapPoint[];
   visits: LiveVisit[];
 };
 

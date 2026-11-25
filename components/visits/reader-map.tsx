@@ -37,10 +37,6 @@ export function ReaderMap({ points, lands = true }: { points: MapPoint[]; lands?
 
   useEffect(() => {
     if (!selected) return;
-    if (!points.some((point) => pointKey(point) === selected)) {
-      setSelected(null);
-      return;
-    }
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setSelected(null);
     };
@@ -55,7 +51,7 @@ export function ReaderMap({ points, lands = true }: { points: MapPoint[]; lands?
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("pointerdown", onPointer);
     };
-  }, [selected, points]);
+  }, [selected]);
 
   const countries = countryPoints(points);
   const ordered = [...points].sort((a, b) => {
