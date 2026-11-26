@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   title: "Visiteurs",
   description: "Nos lecteurs, sur la terre. Pays d'où l'on lit Rusty James News.",
   alternates: { canonical: "/visiteurs" },
+  // Page utilitaire (carte live) : hors index, liens suivis.
+  robots: { index: false, follow: true },
 };
 
 export default function VisitorsPage() {

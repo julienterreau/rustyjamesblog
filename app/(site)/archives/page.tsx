@@ -4,7 +4,8 @@ import { ArticleLink } from "@/components/article-cards";
 import { ArchiveDateFilter } from "@/components/archive-date-filter";
 import { ArchivePager } from "@/components/archive-pager";
 import { JsonLd } from "@/components/json-ld";
-import { archiveJsonLd } from "@/lib/seo";
+import { archiveJsonLd, collectionPageJsonLd } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -55,10 +56,19 @@ export async function generateMetadata({
       : "Index des archives Rusty James News : sciences, histoire, politique et traditions, classées et datées pour ce site.";
   const path = archivesHref({ page, tag: label, date, month, year, from, to });
 
+  // Pages 2+ : noindex pour éviter la cannibalisation avec la page 1.
+  // On laisse follow pour que Google atteigne les articles listés.
+  const paginated = page > 1;
+
   return {
     title,
     description,
-    alternates: { canonical: path },
+    ...(paginated
+      ? { robots: { index: false, follow: true } }
+      : {
+          alternates: { canonical: path },
+          robots: { index: true, follow: true },
+        }),
     openGraph: { title, description, url: path },
   };
 }
@@ -141,6 +151,17 @@ async function ArchiveList({ searchParams }: { searchParams: Promise<ArchivePara
           <Link href="/archives">Retirer</Link>
         </p>
       ) : null}
+      <JsonLd
+        data={collectionPageJsonLd(
+          periodLabel ?? activeTag ?? "Archives",
+          periodLabel
+            ? `Articles des archives Rusty James publiés en ${periodLabel}.`
+            : activeTag
+              ? `Archives Rusty James classées « ${activeTag} ».`
+              : "Index des archives Rusty James News depuis 2009.",
+          absoluteUrl(archivesHref({ page, tag: activeTag, date, month, year, from: fromYear, to: toYear })),
+        )}
+      />
       <JsonLd
         data={archiveJsonLd(
           articles,

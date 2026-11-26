@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { EB_Garamond, Montserrat } from "next/font/google";
 import { Suspense } from "react";
 import { GazetteFooter } from "@/components/gazette-footer";
@@ -47,10 +47,19 @@ export const metadata: Metadata = {
   },
   description: site.description,
   applicationName: site.name,
-  authors: [{ name: "Rusty James News" }],
-  creator: site.name,
+  authors: [{ name: "Rusty James" }],
+  creator: "Rusty James",
   publisher: site.name,
   category: "news",
+  // Pas de canonical racine ici : chaque page définit le sien.
+  alternates: {
+    languages: {
+      "fr-FR": "/",
+    },
+    types: {
+      "application/rss+xml": "/rss.xml",
+    },
+  },
   robots: {
     index: true,
     follow: true,
@@ -69,17 +78,32 @@ export const metadata: Metadata = {
     title: site.title,
     description: site.description,
     url: "/",
+    images: [
+      {
+        url: site.defaultOgImage,
+        width: 1200,
+        height: 630,
+        alt: site.name,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: site.title,
     description: site.description,
+    images: [site.defaultOgImage],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: site.themeColor,
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${montserrat.variable} ${display.variable} ${displayItalic.variable}`}>
+    <html lang="fr-FR" className={`${montserrat.variable} ${display.variable} ${displayItalic.variable}`}>
       <body id="top">
         <link
           rel="stylesheet"

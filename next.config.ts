@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  poweredByHeader: false, 
+  poweredByHeader: false,
+  // Les URLs publiques (dont les slugs Canalblog) sont sans slash final.
+  trailingSlash: false,
   htmlLimitedBots: /.*/,
   images: {
     formats: ["image/webp"],
@@ -15,6 +17,18 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.blogspot.com" },
       { protocol: "https", hostname: "cdn.sanity.io", pathname: "/images/**" },
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+    ];
   },
   experimental: {
     agentFeedback: true,

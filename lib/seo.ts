@@ -316,11 +316,13 @@ export function articleMetadata(article: Article): Metadata {
   const description = rewriteExcerpt(article);
   const path = articlePath(article.slug);
   const image = metadataImage(article.image);
+  const author = article.author || "Rusty James";
 
   return {
     title: article.title,
     description,
     keywords: article.tags.slice(0, 8),
+    authors: [{ name: author }],
     alternates: { canonical: path },
     robots: {
       index: true,
@@ -342,15 +344,17 @@ export function articleMetadata(article: Article): Metadata {
       description,
       publishedTime: article.published_at ?? undefined,
       modifiedTime: article.published_at ?? undefined,
-      authors: [article.author || "Rusty James"],
+      authors: [author],
       tags: article.tags.slice(0, 8),
-      images: image ? [{ url: image, alt: article.title }] : undefined,
+      images: image
+        ? [{ url: image, width: 1200, height: 630, alt: article.title }]
+        : [{ url: site.defaultOgImage, width: 1200, height: 630, alt: site.name }],
     },
     twitter: {
-      card: image ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title: article.title,
       description,
-      images: image ? [image] : undefined,
+      images: [image || site.defaultOgImage],
     },
   };
 }
@@ -365,9 +369,18 @@ export function siteGraph() {
         "@id": `${url}/#website`,
         url,
         name: site.name,
+        alternateName: site.alternateName,
         description: site.description,
         inLanguage: site.language,
         publisher: { "@id": `${url}/#publisher` },
+        potentialAction: {
+          "@type": "SearchAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate: `${url}/?q={search_term_string}`,
+          },
+          "query-input": "required name=search_term_string",
+        },
       },
       {
         "@type": "Organization",
@@ -381,10 +394,39 @@ export function siteGraph() {
   };
 }
 
+export function breadcrumbJsonLd(items: Array<{ name: string; url: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  };
+}
+
+export function collectionPageJsonLd(name: string, description: string, url: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url,
+    inLanguage: site.language,
+    isPartOf: {
+      "@type": "WebSite",
+      url: getSiteUrl(),
+    },
+  };
+}
+
 export function articleJsonLd(article: Article, description: string) {
   const url = absoluteUrl(articlePath(article.slug));
   const home = getSiteUrl();
   const image = metadataImage(article.image);
+  const section = article.tags[0];
 
   return {
     "@context": "https://schema.org",
@@ -392,15 +434,25 @@ export function articleJsonLd(article: Article, description: string) {
       {
         "@type": "Article",
         "@id": `${url}#article`,
-        mainEntityOfPage: url,
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": url,
+        },
         headline: article.title,
         description,
         inLanguage: site.language,
         datePublished: article.published_at ?? undefined,
         dateModified: article.published_at ?? undefined,
-        articleSection: article.tags[0],
+        articleSection: section,
         keywords: article.tags.slice(0, 8).join(", ") || undefined,
-        image: image ? [image] : undefined,
+        image: image
+          ? {
+              "@type": "ImageObject",
+              url: image,
+              width: 1200,
+              height: 630,
+            }
+          : undefined,
         author: {
           "@type": "Person",
           name: article.author || "Rusty James",
@@ -408,14 +460,14 @@ export function articleJsonLd(article: Article, description: string) {
         publisher: { "@id": `${home}/#publisher` },
         isAccessibleForFree: true,
       },
-      {
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Accueil", item: home },
-          { "@type": "ListItem", position: 2, name: "Archives", item: absoluteUrl("/archives") },
-          { "@type": "ListItem", position: 3, name: article.title, item: url },
-        ],
-      },
+      breadcrumbJsonLd([
+        { name: "Accueil", url: home },
+        { name: "Archives", url: absoluteUrl("/archives") },
+        ...(section
+          ? [{ name: section, url: absoluteUrl(`/archives?tag=${encodeURIComponent(section)}`) }]
+          : []),
+        { name: article.title, url },
+      ]),
     ],
   };
 }

@@ -7,11 +7,47 @@ import { GazetteSubscribe } from "@/components/gazette-subscribe";
 import { ShareArticle } from "@/components/share-article";
 import { ReaderMap } from "@/components/visits/reader-map";
 import { getVisitorStats } from "@/lib/visits/stats";
+import { site } from "@/lib/site";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { preload } from "react-dom";
 import { Suspense } from "react";
 
 type HomeParams = { q?: string; rubrique?: string; annee?: string; suite?: string };
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<HomeParams>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const filtered = Boolean(params.q?.trim() || params.rubrique?.trim() || params.annee?.trim() || params.suite);
+
+  return {
+    title: { absolute: site.title },
+    description: site.description,
+    alternates: { canonical: "/" },
+    robots: filtered
+      ? { index: false, follow: true }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+            "max-video-preview": -1,
+          },
+        },
+    openGraph: {
+      title: site.title,
+      description: site.description,
+      url: "/",
+      type: "website",
+    },
+  };
+}
 
 const FILTERS = [
   { label: "Toutes", id: "" },

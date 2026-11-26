@@ -30,7 +30,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const article = await getArticle(slug.join("/"));
-  if (!article) return { title: "Article introuvable", robots: { index: false, follow: true } };
+  if (!article) return { title: "Article introuvable", robots: { index: false, follow: false } };
 
   const raw = article.body?.length ? article.image : (firstArticleImage(article.content_html) ?? article.image);
   const image = raw && isSanityImage(raw) ? sanityImageUrl(raw, 750) : optimizedImageUrl(raw);
