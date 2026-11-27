@@ -569,10 +569,10 @@ a.fil-btn,a.btn-ghost{display:inline-flex;align-items:center;justify-content:cen
 .foot-h.muted{color:var(--muted)}
 .foot-years{display:grid;grid-template-columns:repeat(3,1fr);gap:0 .75rem;margin-bottom:1.5rem}
 .foot-years li a{
-  display:block;padding:.25rem 0;font-size:.75rem;color:var(--muted);transition:color .2s ease;
+  display:block;padding:.25rem 0;font-size:1rem;font-weight:600;color:var(--muted);transition:color .2s ease;
 }
 .foot-years li a:hover{color:var(--paper)}
-.foot-years .n{font-size:.625rem;opacity:.75}
+.foot-years .n{font-size:.75rem;font-weight:500;opacity:.75}
 .foot-poles{padding-top:.25rem}
 .foot-tags{display:flex;flex-wrap:wrap;gap:.25rem}
 .foot-tags span{background:var(--wire);padding:.25rem .5rem;font-size:.6875rem;color:var(--on-surface)}

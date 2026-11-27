@@ -1,7 +1,6 @@
 import { ArticleCover } from "@/components/article-cover";
 import { CoverImage } from "@/components/cover-image";
 import { articlePath, getGazette, type ArticleSummary } from "@/lib/articles";
-import { archivesHref } from "@/lib/archive-links";
 import { THEMES, themeById } from "@/lib/themes";
 import { GazetteSubscribe } from "@/components/gazette-subscribe";
 import { ShareArticle } from "@/components/share-article";
@@ -55,12 +54,6 @@ const FILTERS = [
   { label: "Géopolitique", id: "geopolitique" },
   { label: "Sciences", id: "sciences" },
   { label: "Santé", id: "sante" },
-];
-
-const ERAS = [
-  { from: 2026, to: 2024, t: "2026 – 2024", d: "Cycle Cyber-Occulte", s: "Bio-informatique, intelligence artificielle mimétique, déclassification des projets psychotroniques et résistance vaccinale." },
-  { from: 2021, to: 2019, t: "2021 – 2019", d: "L’Ère des Fractures", s: "Chroniques de la crise sanitaire globale, technologies ARNm naissantes et mutations des libertés publiques." },
-  { from: 2014, to: 2013, t: "2014 – 2013", d: "L’Âge d’Or des Révélations", s: "Sommet historique du blog : fuites NSA/Snowden, manipulation des marchés Forex et découvertes mégalithiques." },
 ];
 
 const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
@@ -131,11 +124,6 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
     else last.items.push(article);
   }
 
-  const years = [...new Set(data.months.map((month) => month.key.slice(0, 4)))];
-  const libraryYear = annee || years[0] || "2026";
-  const libraryMonths = data.months.filter((month) => month.key.startsWith(libraryYear));
-  const peak = data.months.reduce((best, month) => (month.count > best.count ? month : best), data.months[0]);
-  const peakLabel = peak ? `${MONTHS[Number(peak.key.slice(5, 7)) - 1]?.toLocaleLowerCase("fr-FR")} ${peak.key.slice(0, 4)} (${peak.count} art./mois)` : "mars 2014 (110 art./mois)";
   const base = { rubrique, q, annee };
   const count = new Intl.NumberFormat("fr-FR");
 
@@ -341,72 +329,6 @@ async function GazetteHome({ searchParams }: { searchParams: Promise<HomeParams>
           </aside>
         </div>
       </div>
-
-      <section className="biblio" id="grande-bibliotheque">
-        <div className="wrap">
-          <div className="biblio-head">
-            <div>
-              <span className="rubric">Fonds Documentaire Historique (2009 — 2026)</span>
-              <h2 className="h-lg">GRANDE BIBLIOTHÈQUE DES ARCHIVES CHRONOLOGIQUES</h2>
-              <p className="biblio-desc">
-                Inventaire mensuel des publications, préservées année par année. Sélectionnez une année pour explorer les registres.
-              </p>
-            </div>
-            <div className="biblio-badge">
-              <span className="ms notranslate" translate="no" aria-hidden="true">storage</span>
-              Pic d&apos;activité : {peakLabel}
-            </div>
-          </div>
-          <ul className="year-tabs">
-            {years.map((year) => (
-              <li key={year}>
-                <Link href={archivesHref({ year })} className={`year-tab${year === libraryYear ? " is-active" : ""}`}>
-                  {year}
-                  <span className="n">{count.format(data.months.filter((month) => month.key.startsWith(year)).reduce((sum, month) => sum + month.count, 0))}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="month-grid">
-            {libraryMonths.map((month) => (
-              <Link key={month.key} className="month-card" href={archivesHref({ month: month.key })}>
-                <div className="mc-top">
-                  <span className="mc-month">{MONTHS[Number(month.key.slice(5, 7)) - 1]}</span>
-                  <span className="mc-count">{month.count} art.</span>
-                </div>
-                <p className="mc-sample">{month.title || "Registre du mois."}</p>
-                <span className="mc-link">Lire l’archive →</span>
-              </Link>
-            ))}
-          </div>
-          <div className="panorama">
-            <h3 className="pano-title">Aperçu de la cartographie documentaire pluriannuelle</h3>
-            <div className="pano-grid">
-              {ERAS.map((era) => {
-                const total = data.months
-                  .filter((month) => {
-                    const year = Number(month.key.slice(0, 4));
-                    return year <= era.from && year >= era.to;
-                  })
-                  .reduce((sum, month) => sum + month.count, 0);
-                return (
-                  <div key={era.t} className="pano-card">
-                    <div className="pano-top">
-                      <span className="pano-era">{era.t}</span>
-                      <span className="pano-name">{era.d}</span>
-                    </div>
-                    <p className="pano-desc">{era.s}</p>
-                    <div className="pano-foot">
-                      <span>Articles indexés : {count.format(total)}</span>
-                      <Link href={archivesHref({ from: era.to, to: era.from })}>Explorer le cycle →</Link>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
 
       <section className="hubs-sec" id="categories">
         <div className="hubs-head">
