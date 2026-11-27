@@ -1,5 +1,6 @@
 "use client";
 
+import { getSiteUrl } from "@/lib/site";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 type ShareArticleProps = {
@@ -15,7 +16,7 @@ type Destination = {
 };
 
 function pageUrl(path: string) {
-  return new URL(path, window.location.origin).href;
+  return new URL(path, getSiteUrl()).href;
 }
 
 function Mark({ path }: { path: string }) {
